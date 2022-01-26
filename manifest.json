@@ -1,0 +1,9 @@
+{
+    "name": "Focus Helper and Study Logger",
+    "description": "Extension to help you studying/working",
+    "version": "1.0",
+    "manifest_version": 3,
+    "background": {
+      "service_worker": "background.js"
+    }
+  }
