@@ -1,3 +1,9 @@
+body {
+  height: 555px;
+  width: 332px;
+  background-color: green;
+}
+
 button {
     outline: none;
     margin: 10px;
@@ -5,6 +11,7 @@ button {
     border-radius: 2px;
     background-color: blue;
     padding: 30px 10px;
+    text-align: center;
   }
   
   button.onclick {
