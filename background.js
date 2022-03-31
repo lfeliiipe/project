@@ -5,7 +5,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // Save blackList variable using storage API
-const blackList = ["twitter.com", "facebook.com", "youtube.com"];
+const blackList = [];
 chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.sync.set({ blackList });
 });
