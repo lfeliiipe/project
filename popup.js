@@ -1,10 +1,10 @@
 // Display black list with paragraphs in a div element
 let div1 = document.getElementById("div1");
 function showList() {
-    
+
     // Get blackList from storage variable
     chrome.storage.sync.get("blackList", ({ blackList }) => {
-        
+    
         // Create and append paragraph nodes with blocked sites
         for (site of blackList) {
             const p = document.createElement("p");
@@ -16,10 +16,8 @@ function showList() {
 }
 showList();
 
-// Initialize button with user's preferred color
-let b1 = document.getElementById("b1");
-
 // Change b1 color background based on storage variable inZone
+let b1 = document.getElementById("b1");
 function changeButtonColor() {
     chrome.storage.sync.get("inZone", ({ inZone }) => {
         if (inZone) {
@@ -60,7 +58,7 @@ function blockSites() {
         // Check if the current page is not in the black list
         blackList.forEach(function (value) {
             if (window.location.hostname.includes(value)) {
-                window.location.href = "chrome-extension://hknjekbcijhgckhennogkgpigbndefph/block.html";
+                window.location.assign("chrome-extension://hknjekbcijhgckhennogkgpigbndefph/block.html");
             }
         });
     });
@@ -70,13 +68,27 @@ function blockSites() {
 let bf1 = document.getElementById("bf1");
 bf1.addEventListener("click", function () {
     let value = document.getElementById("input1").value;
-    document.getElementById("input1").value = "";
+
+    // Make sure field is not empty
+    if (value === "") {
+        return;
+    }
+
+    // Remove old paragraphs from div1
+    while (div1.firstChild) {
+        div1.removeChild(div1.firstChild);
+    }
     
     chrome.storage.sync.get("blackList", ({ blackList }) => {
+        
+        // Update list
         blackList.push(value);
         chrome.storage.sync.set({ blackList });
-    });
 
-    // Update div to show black list
-    showList();
+        // Clear field
+        document.getElementById("input1").value = "";
+
+        // Update div to show black list
+        showList();
+    });
 });
