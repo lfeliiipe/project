@@ -55,10 +55,11 @@ b1.addEventListener("click", async () => {
 function blockSites() {
     chrome.storage.sync.get("blackList", ({ blackList }) => {
 
-        // Check if the current page is not in the black list
+        // Check if the current page is in the black list then block
         blackList.forEach(function (value) {
             if (window.location.hostname.includes(value)) {
-                window.location.assign("chrome-extension://hknjekbcijhgckhennogkgpigbndefph/block.html");
+                let url = chrome.runtime.getURL("block.html");
+                location.assign(url);
             }
         });
     });
