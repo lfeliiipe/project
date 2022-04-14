@@ -4,8 +4,8 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.sync.set({ inZone });
 });
 
-// Save blackList variable using storage API
-const blackList = [];
+// Save blockList variable using storage API
+const blockList = [];
 chrome.runtime.onInstalled.addListener(() => {
-    chrome.storage.sync.set({ blackList });
+    chrome.storage.sync.set({ blockList });
 });

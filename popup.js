@@ -1,12 +1,12 @@
-// Display black list in a div element
+// Display block list in a div element
 let listDiv = document.getElementById("listDiv");
 function showList() {
 
-    // Get blackList from storage variable
-    chrome.storage.sync.get("blackList", ({ blackList }) => {
+    // Get blockList from storage variable
+    chrome.storage.sync.get("blockList", ({ blockList }) => {
 
         // Create block list header
-        const len = blackList.length;
+        const len = blockList.length;
         if (len > 0) {
             let p = document.createElement("p");
             let pText = document.createTextNode("BLOCK LIST");
@@ -26,7 +26,7 @@ function showList() {
 
             // Create span with website from block list
             const span = document.createElement("span");
-            const spanText = document.createTextNode(blackList[i].toUpperCase());
+            const spanText = document.createTextNode(blockList[i].toUpperCase());
             span.appendChild(spanText);
             div.appendChild(span);
 
@@ -53,15 +53,15 @@ function deleteButton() {
 
     // Search and remove an specific website from the list
     const deleteSite = this.previousSibling.innerHTML.toLowerCase();
-    chrome.storage.sync.get("blackList", ({ blackList }) => {
+    chrome.storage.sync.get("blockList", ({ blockList }) => {
 
-        let len = blackList.length;
+        let len = blockList.length;
         for (let i = 0; i < len; i++) {
-            if (blackList[i] === deleteSite) {
-                blackList.splice(i ,1);
+            if (blockList[i] === deleteSite) {
+                blockList.splice(i ,1);
             }
         }
-        chrome.storage.sync.set({ blackList });
+        chrome.storage.sync.set({ blockList });
 
         // Update the page's html
         removeNodes(listDiv);
@@ -98,8 +98,16 @@ b1.addEventListener("click", function () {
 
 // When the button is clicked, inject blockSites into current page
 b1.addEventListener("click", async () => {
+    
     let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  
+    
+    console.log(typeof tab);
+
+    // Abort injecting script in the extension's pages
+    if (tab.url.includes("chrome-extension://") || tab.url.includes("chrome://")) {
+        return;
+    }
+
     chrome.scripting.executeScript({
         target: { tabId: tab.id },
         function: blockSites,
@@ -110,10 +118,10 @@ b1.addEventListener("click", async () => {
 // The body of this function will be executed 
 // as a content script inside the current page
 function blockSites() {
-    chrome.storage.sync.get("blackList", ({ blackList }) => {
+    chrome.storage.sync.get("blockList", ({ blockList }) => {
 
-        // Check if the current page is in the black list then block
-        blackList.forEach(function (value) {
+        // Check if the current page is in the block list then block it
+        blockList.forEach(function (value) {
             if (window.location.hostname.includes(value)) {
                 let url = chrome.runtime.getURL("block.html");
                 location.assign(url);
@@ -123,9 +131,9 @@ function blockSites() {
 }
 
 
-// Add sites to black list when button is clicked
-let bf1 = document.getElementById("bf1");
-bf1.addEventListener("click", function () {
+// Add sites to block list when button is clicked
+let form1 = document.getElementById("form1");
+form1.addEventListener("submit", function () {
     let value = document.getElementById("input1").value;
 
     // Make sure field is not empty
@@ -136,16 +144,16 @@ bf1.addEventListener("click", function () {
     // Remove old nodes from listDiv
     removeNodes(listDiv);
     
-    chrome.storage.sync.get("blackList", ({ blackList }) => {
+    chrome.storage.sync.get("blockList", ({ blockList }) => {
         
         // Update list
-        blackList.push(value);
-        chrome.storage.sync.set({ blackList });
+        blockList.push(value);
+        chrome.storage.sync.set({ blockList });
 
         // Clear field
         document.getElementById("input1").value = "";
 
-        // Update div to show black list
+        // Update div to show block list
         showList();
     });
 });
