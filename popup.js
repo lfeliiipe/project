@@ -96,41 +96,6 @@ b1.addEventListener("click", function () {
 });
 
 
-// When the button is clicked, inject blockSites into current page
-b1.addEventListener("click", async () => {
-    
-    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
-    console.log(typeof tab);
-
-    // Abort injecting script in the extension's pages
-    if (tab.url.includes("chrome-extension://") || tab.url.includes("chrome://")) {
-        return;
-    }
-
-    chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: blockSites,
-    });
-});
-
-  
-// The body of this function will be executed 
-// as a content script inside the current page
-function blockSites() {
-    chrome.storage.sync.get("blockList", ({ blockList }) => {
-
-        // Check if the current page is in the block list then block it
-        blockList.forEach(function (value) {
-            if (window.location.hostname.includes(value)) {
-                let url = chrome.runtime.getURL("block.html");
-                location.assign(url);
-            }
-        });
-    });
-}
-
-
 // Add sites to block list when button is clicked
 let form1 = document.getElementById("form1");
 form1.addEventListener("submit", function () {
