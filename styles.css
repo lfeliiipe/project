@@ -4,21 +4,36 @@ body {
   background-color: green;
 }
 
-button {
+button:enabled {
     outline: none;
     margin: 10px;
     border: none;
     border-radius: 2px;
-    background-color: blue;
+    background: blue;
     padding: 30px 10px;
     text-align: center;
   }
-  
-  button.onclick {
-    box-shadow: 0 0 0 2px white,
-                0 0 0 4px black;
+
+  #zoneButton:disabled {
+    outline: none;
+    margin: 10px;
+    border: none;
+    border-radius: 2px;
+    padding: 30px 10px;
+    text-align: center;
+    background: gray;
   }
 
   div {
+    background-color: orange;
+  }
+
+  p {
+    text-align: center;
+    background-color: white;
+    margin-bottom: 0px;
+  }
+
+  #form2 {
     background-color: orange;
   }

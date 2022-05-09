@@ -11,60 +11,39 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 
-// Listen for changes in storage API
-chrome.storage.onChanged.addListener(function (changes, namespace) {
-    
-    // Turn blocking on and off when changes happen to 'inZone'
-    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-        
-        // Add listener for updates on tabs
-        if (key === "inZone" && newValue === true) {
-            chrome.tabs.onUpdated.addListener(blockingListener);
-        }
+// Listen for web navigation changes (url changes)
+chrome.webNavigation.onCommitted.addListener((details) => {
 
-        // Remove listener for updates on tabs
-        if (key === "inZone" && newValue === false) {
-            if (chrome.tabs.onUpdated.hasListener(blockingListener)) {
-                chrome.tabs.onUpdated.removeListener(blockingListener);
+    // Retrieve all items from storage API
+    chrome.storage.sync.get(null, (items) => {
+
+        // Abort injecting script in the extension's pages
+        const notAllowedUrls = ["chrome://", "chrome-extension://"];
+        for (site of notAllowedUrls) {
+            if (details.url.includes(site)) {
+                console.log(details.url + " contem " + site + " por isso nao injetou");
+                return;
             }
         }
-    }
-});
 
+        console.log("items", items);
 
-// Listen for updates on tabs
-async function blockingListener() {
-    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
-    // Abort injecting script when url is not ready
-    if (!tab.url) {
-        return;
-    }
-
-    // Abort injecting script in the extension's pages
-    const notAllowedUrls = ["chrome://", "chrome-extension://"];
-    for (site of notAllowedUrls) {
-        if (tab.url.includes(site)) {
-            return;
-        }
-    }
-    
-    chrome.storage.sync.get("blockList", ({ blockList }) => {
-        for (site of blockList) {
-
-            // Insert script in sites from the block list
-            if (tab.url.includes(site)) {
+        // Redirect if current url is in the block list and inZone mode is on
+        for (site of items.blockList) {
+            if (details.url.includes(site) && (items.inZone)) {
+                console.log("listener de navegação ouviu e injetou script ao acessar: ", details.url);
+        
                 chrome.scripting.executeScript({
-                    target: { tabId: tab.id },
+                    target: { tabId: details.tabId },
                     function: blockSites,
                 });
             }
         }
     });
-}
+});
 
 
-// The body of this function will be executed as a content script inside the current page
+// This function will be executed as a content script inside the chosen tab
 function blockSites() {
     let url = chrome.runtime.getURL("block.html");
     location.assign(url);

@@ -9,7 +9,39 @@
             <button id="bf1" type="submit">Add</button>
         </form>
         <div id="listDiv"></div>
-        <button id="b1" type="button">GET IN THE ZONE</button>
+        <p>TIME SETTINGS</p>
+        <form id="form2">
+
+            <div id="und_div">
+                <input type="radio" id="und_radio" name="set_time" value="undefined">
+                <label for="undefined">Undefined</label>
+            </div>
+            <div id="pomo_div">
+                <input type="radio" id="pomo_radio" name="set_time" value="pomodoro">
+                <label for="pomodoro">Pomodoro Sessions</label>
+            </div>
+            <div id="def_div">
+                <input type="radio" id="def_radio" name="set_time" value="defined">
+                <label for="defined">Defined</label>
+            </div>
+
+            
+            
+
+            <div id="div_pomodoro">
+                <input type="number" id="sessions" min="1" max="10" value="1">
+                <label for="sessions">25/5 Sessions</label>
+            </div>
+
+            <div id="div_defined">
+                <input type="number" min="0" max="23" id="hours" value="0">
+                <label for="hours">Hours</label>
+                <input type="number" min="0" max="59" id="minutes" value="30">
+                <label for="minutes">Minutes</label>
+            </div>            
+            <button id="zoneButton" type="submit" display="none">GET IN THE ZONE</button>
+        </form>
+        
         <script src="popup.js"></script>
     </body>
 </html>
