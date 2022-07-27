@@ -1,10 +1,14 @@
-// Redirect to zone page when inZone mode is on
+// Append link to zone page when zone time is on
+const zone_page_link = document.getElementById("zone_page_link");
 chrome.storage.sync.get("inZone", ({ inZone }) => {
-    if (inZone) {
-        let url = chrome.runtime.getURL("zone_page.html");
-        window.location.assign(url);
+    if (inZone.started) {
+        const zp_link = document.createElement("a");
+        zp_link.href = "zone_page.html";
+        zp_link.innerHTML = "ZONE TIMER";
+        zone_page_link.appendChild(zp_link);
     }
 });
+
 
 // Display block list in a div element
 let listDiv = document.getElementById("listDiv");
@@ -55,7 +59,8 @@ function showList() {
 }
 showList();
 
-// Hide zoneButton
+
+// Hide zoneButton when radio buttons are not checked
 const zoneButton = document.getElementById("zoneButton");
 const und = document.getElementById("und_radio");
 const pomo = document.getElementById("pomo_radio");
@@ -64,10 +69,6 @@ if (!und.checked && !pomo.checked && !def.checked) {
     zoneButton.style.display = "none";
     console.log("apagou o botaozao");
 }
-
-console.log("undefined checked", und.checked);
-console.log("pomodoro checked", pomo.checked);
-console.log("defined checked", def.checked);
 
 
 // Add listeners on radio buttons
@@ -79,13 +80,13 @@ for (const input of inputs) {
     }
 }
 
+// Hide divs
 const div_pomodoro = document.getElementById("div_pomodoro");
 const div_defined = document.getElementById("div_defined");
-
 div_pomodoro.style.display = "none";
 div_defined.style.display = "none";
 
-// Show zoneButton when any radio button is clicked
+// Show zoneButton and divs when any radio button is clicked
 function showTimeSettings() {
     switch(this.id) {
         case "und_radio":
@@ -114,7 +115,7 @@ function showTimeSettings() {
 // Remove websites from block list
 function deleteButton() {
 
-    // Search and remove an specific website from the list
+    // Search and remove a specific website from the list
     const deleteSite = this.previousSibling.innerHTML.toLowerCase();
     chrome.storage.sync.get("blockList", ({ blockList }) => {
 
@@ -133,13 +134,80 @@ function deleteButton() {
 }
 
 
-// When the button is clicked set inZone to true
+// Remove all child nodes from an element
+function removeNodes(element) {
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+}
+
+
+// When the button is clicked update inZone object
 zoneButton.addEventListener("click", () => {
     chrome.storage.sync.get("inZone", ({ inZone }) => {
-        inZone = true;
+        
+        // Turn zone on
+        inZone.isOn = true;
+        inZone.isCompleted = false;
+        inZone.started = true;
+        
+        // Save time setting
+        let timeSetting = "";
+        if (und.checked) {
+            timeSetting = "undefined";
+        } else if (pomo.checked) {
+            timeSetting = "pomodoro";
+        } else if (def.checked) {
+            timeSetting = "defined";
+        }
+        inZone.timeSetting = timeSetting;
+
+        // Save start date and time
+        const date = new Date();
+        inZone.startDateTime = date.toString();
+
+        // Calculate end time based on time settings
+        let milis = 0;
+        const endDate = new Date();
+        switch (inZone.timeSetting) {
+            case "pomodoro":
+                let zoneMinutes = parseInt(document.getElementById("zone_minutes").value);
+                let breakMinutes = parseInt(document.getElementById("break_minutes").value);
+                let cicles = parseInt(document.getElementById("sessions").value);
+                let cicleMinutes = zoneMinutes + breakMinutes;
+                milis = cicles * cicleMinutes * 60 * 1000;
+                endDate.setTime(date.getTime() + milis);
+                inZone.endDateTime = endDate.toString();
+
+                inZone.pomoSettings.zoneMinutes = zoneMinutes;
+                inZone.pomoSettings.breakMinutes = breakMinutes;
+                inZone.pomoSettings.cicles = cicles;
+                break;
+            case "defined":
+                let minutes = parseInt(document.getElementById("minutes").value);
+                let hours = parseInt(document.getElementById("hours").value);
+                milis = ((hours * 60) + minutes) * 60 * 1000;
+                endDate.setTime(date.getTime() + milis);
+                inZone.definedSettings.hours = hours;
+                inZone.definedSettings.minutes = minutes;
+                inZone.endDateTime = endDate.toString();
+                break;
+            default:
+                break;
+        }
+        
+        // Persist changes
         chrome.storage.sync.set({ inZone });
-        let url = chrome.runtime.getURL("zone_page.html");
-        window.location.assign(url);
+
+        // Send inZone as a message to background script
+        chrome.runtime.sendMessage(inZone, () => {
+
+            // Redirect the page on response
+            let url = chrome.runtime.getURL("zone_page.html");
+            window.location.assign(url);
+        });
+
+        
     });
 });
 
@@ -170,11 +238,3 @@ form1.addEventListener("submit", function () {
         showList();
     });
 });
-
-
-// Remove all child nodes from an element
-function removeNodes(element) {
-    while (element.firstChild) {
-        element.removeChild(element.firstChild);
-    }
-}

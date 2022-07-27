@@ -30,7 +30,11 @@
 
             <div id="div_pomodoro">
                 <input type="number" id="sessions" min="1" max="10" value="1">
-                <label for="sessions">25/5 Sessions</label>
+                <label for="sessions">Sessions</label> <br>
+                <input type="number" min="0" max="59" id="zone_minutes" value="25">
+                <label for="zone_minutes">Zone Minutes</label>
+                <input type="number" min="0" max="59" id="break_minutes" value="5">
+                <label for="break_minutes">Break Minutes</label>
             </div>
 
             <div id="div_defined">
@@ -40,6 +44,7 @@
                 <label for="minutes">Minutes</label>
             </div>            
             <button id="zoneButton" type="submit" display="none">GET IN THE ZONE</button>
+            <div id="zone_page_link"></div>
         </form>
         
         <script src="popup.js"></script>
