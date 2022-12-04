@@ -82,19 +82,25 @@ let timeout = 0;
 chrome.runtime.onMessage.addListener((inZone, sender, sendResponse) => {
 
     console.log("mensagem recebida de: ", sender);
-    // Clear defined routine timeout
+    // Clear defined routine timeout and quit listener
     if(inZone.isCompleted && inZone.timeSetting === "defined") {
         clearTimeout(timeout);
         sendResponse({b: 1});
         return;
     }
 
-    // Clear pomodoro timeouts
+    // Clear pomodoro timeouts and quit listener
     else if(inZone.isCompleted && inZone.timeSetting === "pomodoro") {
         for(let i = 0, len = inZone.pomoTimeouts.length; i < len; i++) {
             clearTimeout(inZone.pomoTimeouts[i]);
             sendResponse({b: 2});
         }
+        return;
+    }
+
+    // Just send response in case of undefined routine and quit listener
+    else if(inZone.isCompleted && inZone.timeSetting === "undefined") {
+        sendResponse({b: 3});
         return;
     }
 
@@ -108,6 +114,10 @@ chrome.runtime.onMessage.addListener((inZone, sender, sendResponse) => {
         case "pomodoro":
             pomodoroRoutine(inZone);
             sendResponse({a: 2});
+            break;
+        
+        case "undefined":
+            sendResponse({a: 3});
             break;
 
         default:

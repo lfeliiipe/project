@@ -231,9 +231,6 @@ form1.addEventListener("submit", function () {
         blockList.push(value);
         chrome.storage.sync.set({ blockList });
 
-        // Clear field
-        document.getElementById("input1").value = "";
-
         // Update div to show block list
         showList();
     });
