@@ -2,7 +2,7 @@ let interval = 0;
 chrome.storage.sync.get("inZone", ({ inZone }) => {
 
     // Show zone mode
-    updateZoneStatus(inZone);
+    updateZoneStatus();
     
     // Turn zone mode off using button
     const zoneOff = document.getElementById("zoneOff").addEventListener("click", clearTimer(inZone));
@@ -24,6 +24,7 @@ chrome.storage.sync.get("inZone", ({ inZone }) => {
 });
 
 
+// Calculate and display time for undefined time setting
 function undefinedRoutine(inZone) {
     
     // Zone interval timer
@@ -40,6 +41,7 @@ function undefinedRoutine(inZone) {
 }
 
 
+// Calculate and display timers for pomodoro time setting
 function pomodoroRoutine(inZone) {
 
     // Create periods nodes
@@ -49,6 +51,9 @@ function pomodoroRoutine(inZone) {
 
     // Set interval to display pomdoro timers
     interval = setInterval(function pomodoroTimer() {
+
+        // Show zone mode
+        updateZoneStatus();
 
         // Get hour, minute and second to the end of the period in variables
         const now = new Date();
@@ -61,6 +66,7 @@ function pomodoroRoutine(inZone) {
         // (Base Case) Stop the interval when the current period is over and there's no more periods to count
         if (s == 0 && m == 0 && h == 0 && currentPeriod >= inZone.pomoDates.length - 1) {
             console.log("entrou no if de limpar o interval: ", interval);
+            updateZoneStatus();
             clearInterval(interval);
         }
 
@@ -76,7 +82,7 @@ function pomodoroRoutine(inZone) {
 }
 
 
-// Create and update pomodoro periods
+// Create and update pomodoro period indicator
 function createPeriods(periods, currentPeriod, mode) {
 
     let div_periods = document.getElementById("div_periods");
@@ -103,6 +109,7 @@ function createPeriods(periods, currentPeriod, mode) {
 }
 
 
+// Calculate and display time for defined time setting
 function definedRoutine(inZone) {
 
     // Zone interval timer
@@ -119,6 +126,7 @@ function definedRoutine(inZone) {
         // Stop timer when time is over
         if (s == 0 && m == 0 && h == 0) {
             clearInterval(interval);
+            updateZoneStatus();
         }
     }, 1000);
 }
@@ -147,7 +155,7 @@ function showTimer(h, m, s) {
 }
 
 
-// Stop timer using button
+// Stop timers using button
 function clearTimer(inZone) {
     return function() {
 
@@ -161,29 +169,31 @@ function clearTimer(inZone) {
         // Stop timers
         clearInterval(interval);
         showTimer(0, 0, 0);
+        chrome.alarms.clearAll();
 
-        // Send inZone as a message to stop timeouts in the background script
-        chrome.runtime.sendMessage(inZone, () => {
-
-            // Show zone mode in response
-            updateZoneStatus(inZone);
-        });
+        // Show zone mode
+        updateZoneStatus();
+        
     }
 }
 
 
-function updateZoneStatus(inZone) {
+// Update text to indicate to users if they are in zone time, break or finished sesison
+function updateZoneStatus() {
 
-    const zoneStatus = document.getElementById("zone_status");
-    if(inZone.isCompleted) {
-        zoneStatus.innerHTML = "You've finished ";
-        document.getElementById("div_time").style.display = "none";
-        div_periods.style.display = "none";
-    } else if(inZone.started && !inZone.isOn) {
-        zoneStatus.innerHTML = ">> <i>BREAK</i> << Time";
-    } else if(inZone.started && inZone.isOn) {
-        zoneStatus.innerHTML = "You're in the >> <i>ZONE</i> <<";
-    } else if(!inZone.started) {
-        zoneStatus.style.display = "none";
-    } 
+    chrome.storage.sync.get("inZone", ({ inZone }) => {
+
+        const zoneStatus = document.getElementById("zone_status");
+        if(inZone.isCompleted) {
+            zoneStatus.innerHTML = "You've finished ";
+            document.getElementById("div_time").style.display = "none";
+            div_periods.style.display = "none";
+        } else if(inZone.started && !inZone.isOn) {
+            zoneStatus.innerHTML = ">> <i>BREAK</i> << Time";
+        } else if(inZone.started && inZone.isOn) {
+            zoneStatus.innerHTML = "You're in the >> <i>ZONE</i> <<";
+        } else if(!inZone.started) {
+            zoneStatus.style.display = "none";
+        } 
+    });
 }

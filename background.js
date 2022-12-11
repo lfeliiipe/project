@@ -17,7 +17,6 @@ chrome.runtime.onInstalled.addListener(() => {
                 definedSettings: {},
                 pomoSettings: {},
                 pomoStatus: [],
-                pomoTimeouts: [],
                 pomoDates: [],
             };
             chrome.storage.sync.set({ inZone });
@@ -77,145 +76,90 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 });
 
 
-// Listen for messages
-let timeout = 0;
-chrome.runtime.onMessage.addListener((inZone, sender, sendResponse) => {
-
-    console.log("mensagem recebida de: ", sender);
-    // Clear defined routine timeout and quit listener
-    if(inZone.isCompleted && inZone.timeSetting === "defined") {
-        clearTimeout(timeout);
-        sendResponse({b: 1});
-        return;
-    }
-
-    // Clear pomodoro timeouts and quit listener
-    else if(inZone.isCompleted && inZone.timeSetting === "pomodoro") {
-        for(let i = 0, len = inZone.pomoTimeouts.length; i < len; i++) {
-            clearTimeout(inZone.pomoTimeouts[i]);
-            sendResponse({b: 2});
-        }
-        return;
-    }
-
-    // Just send response in case of undefined routine and quit listener
-    else if(inZone.isCompleted && inZone.timeSetting === "undefined") {
-        sendResponse({b: 3});
-        return;
-    }
-
-    // Set timers based on time setting
-    switch(inZone.timeSetting) {
-        case "defined":
-            definedRoutine(inZone);
-            sendResponse({a: 1});
-            break;
-        
-        case "pomodoro":
-            pomodoroRoutine(inZone);
-            sendResponse({a: 2});
-            break;
-        
-        case "undefined":
-            sendResponse({a: 3});
-            break;
-
-        default:
-            break;
-    }
+// Listen for alarms
+chrome.alarms.onAlarm.addListener((alarm) => {
     
+    // Alarm for DEFINED time setting
+    if(alarm.name === "defined") {
+        endZoneTime(true);
+        notify("Session is over!");
+    }
+
+    // Alarms for POMODORO time setting
+    else if(alarm.name.includes("pomo")) {
+
+        // Narrow pomodoro possibilities to three options (zone, break, last)
+        let pomoIndex = alarm.name.slice(alarm.name.indexOf(" ") + 1);
+        if(pomoIndex !== "last" && parseInt(pomoIndex) % 2 == 0) pomoIndex = "zone";
+        else if(pomoIndex !== "last" && parseInt(pomoIndex) % 2 != 0) pomoIndex = "break";
+        
+        // Update inZone and notify user
+        switch(pomoIndex) {
+            case "zone":
+                endZoneTime();
+                notify("Zone time is over!");
+                break;
+            
+            case "break":
+                endBreakTime();
+                notify("Break time is over!");
+                break;
+
+            case "last":
+                endBreakTime(true);
+                notify("Pomodoro session is over!");
+                break;
+        }
+    }
 });
 
 
-function pomodoroRoutine(inZone) {
-
-    // Declare variables 
-    let breakMinutes = inZone.pomoSettings.breakMinutes;
-    let zoneMinutes = inZone.pomoSettings.zoneMinutes;
-    let zoneSeconds = zoneMinutes * 60;
-    let cicles = inZone.pomoSettings.cicles;
-    let cicleMinutes = breakMinutes + zoneMinutes;
-    let cicleSeconds = cicleMinutes * 60;
-    let periods = cicles * 2;
-
-    // Set first period on (first zone time)
-    inZone.pomoStatus[0] = "zone";
-    chrome.storage.sync.set({ inZone });
-
-    // Set timeouts dates to sync with zone page
-    const now = new Date();
-    const blank = new Date();
-
-    // Set timeouts to change settings when its zone time or break time
-    for(let i = 0, j = 0; i < periods; i += 2, j++) {
-
-        // End of ZONE TIME
-        // Set background timeout
-        inZone.pomoTimeouts[i] = setTimeout(() => {
-            inZone.isOn = false;
-            inZone.pomoStatus[i + 1] = "break";
-            chrome.storage.sync.set({ inZone });
-            console.log("END OF ZONE TIME");
-        }, ((j * cicleSeconds) + zoneSeconds) * 1000);
-
-        // Set timeout dates to sync with zone page
-        blank.setTime(now.getTime() + (((j * cicleSeconds) + zoneSeconds) * 1000));
-        inZone.pomoDates[i] = blank.toString();
-
-
-        // End of LAST BREAK TIME   
-        // Set background timeout
-        if(i + 1 === periods - 1) {
-            inZone.pomoTimeouts[i + 1] = setTimeout(() => {
-                inZone.isOn = false;
-                inZone.isCompleted = true;
-                inZone.started = false;
-                inZone.pomoStatus[i + 2] = "end";
-                chrome.storage.sync.set({ inZone });
-                console.log("END OF POMODORO");
-            }, ((j * cicleSeconds) + cicleSeconds) * 1000);
-
-            // Set timeout dates to sync with zone page
-            blank.setTime(now.getTime() + (((j * cicleSeconds) + cicleSeconds) * 1000));
-            inZone.pomoDates[i + 1] = blank.toString();
-        }
+// Update inZone object when zone time is over
+function endZoneTime(completed=false) {
+    chrome.storage.sync.get("inZone", ({ inZone }) => {
         
-        // End of REGULAR BREAK TIME
-        // Set background timeout
-        else {
-            inZone.pomoTimeouts[i + 1] = setTimeout(() => {
-                inZone.isOn = true;
-                inZone.pomoStatus[i + 2] = "zone";
-                chrome.storage.sync.set({ inZone });
-                console.log("END OF BREAK TIME");
-            }, ((j * cicleSeconds) + cicleSeconds) * 1000);
-
-            // Set timeout dates to sync with zone page
-            blank.setTime(now.getTime() + (((j * cicleSeconds) + cicleSeconds) * 1000));
-            inZone.pomoDates[i + 1] = blank.toString();
+        // Completed true means DEFINED time setting, in this case pomoStatus doesn't change 
+        if(completed) {
+            inZone.isCompleted = true;
+        } else {
+            inZone.pomoStatus.push("break");
         }
-    }
 
-    // Update changes to storage API
-    chrome.storage.sync.set({ inZone });
-
-}
-
-
-function definedRoutine(inZone) {
-    const now = new Date();
-    const endDate = Date.parse(inZone.endDateTime);
-    let totalSeconds = Math.trunc(endDate / 1000) - Math.trunc(now.getTime() / 1000);
-
-    timeout = setTimeout(endRoutine(inZone), totalSeconds * 1000);
-}
-
-
-function endRoutine(inZone) {
-    return () => {
-        console.log("ENTROU NA FUNCTION ENDROUTINE");
         inZone.isOn = false;
-        inZone.isCompleted = true;
         chrome.storage.sync.set({ inZone });
-    }  
+    });
+}
+
+
+// Update inZone object when break time is over
+function endBreakTime(completed=false) {
+    chrome.storage.sync.get("inZone", ({ inZone }) => {
+        
+        // Completed true means pomodoro session is over
+        if(completed) {
+            inZone.isCompleted = true;
+            inZone.isOn = false;
+            inZone.pomoStatus.push("end");
+        } else {
+            inZone.pomoStatus.push("zone");
+            inZone.isOn = true;
+        }
+
+        chrome.storage.sync.set({ inZone });
+    });
+}
+
+
+// Notify user with messages to indicate end of zone or break time
+function notify(msg) {
+    chrome.notifications.create({
+        iconUrl: "test.png",
+        type: "basic",
+        title: "Focus Helper and Studdy Logger",
+        message: msg,
+        buttons: [
+          { title: "Keep it Flowing." }
+        ],
+        priority: 0
+      });
 }

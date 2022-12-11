@@ -182,16 +182,29 @@ zoneButton.addEventListener("click", () => {
                 inZone.pomoSettings.zoneMinutes = zoneMinutes;
                 inZone.pomoSettings.breakMinutes = breakMinutes;
                 inZone.pomoSettings.cicles = cicles;
+
+                // Persist changes
+                chrome.storage.sync.set({ inZone });
+
+                createAlarm("pomodoro", [zoneMinutes, breakMinutes, cicles, inZone]);
                 break;
+
             case "defined":
                 let minutes = parseInt(document.getElementById("minutes").value);
                 let hours = parseInt(document.getElementById("hours").value);
                 milis = ((hours * 60) + minutes) * 60 * 1000;
                 endDate.setTime(date.getTime() + milis);
+                inZone.endDateTime = endDate.toString();
+
                 inZone.definedSettings.hours = hours;
                 inZone.definedSettings.minutes = minutes;
-                inZone.endDateTime = endDate.toString();
+                
+                // Persist changes
+                chrome.storage.sync.set({ inZone });
+                
+                createAlarm("defined", [hours, minutes]);
                 break;
+
             default:
                 break;
         }
@@ -199,17 +212,80 @@ zoneButton.addEventListener("click", () => {
         // Persist changes
         chrome.storage.sync.set({ inZone });
 
+        /*
         // Send inZone as a message to background script
         chrome.runtime.sendMessage(inZone, () => {
 
             // Redirect the page on response
             let url = chrome.runtime.getURL("zone_page.html");
             window.location.assign(url);
-        });
 
+        });
+       
+        // Create alarms based on time settings
+        if(inZone.timeSetting === "defined") {
+            chrome.alarms.create("defined", {
+                delayInMinutes: inZone.definedSettings.minutes + (inZone.definedSettings.hours * 60)
+            });
+            console.log("ALARME COMEÇADO NO POPUP");
+        } else if(inZone.timeSetting === "pomodoro") {
+
+        }
+        */
         
     });
 });
+
+
+function createAlarm(type, values) {
+    
+    // Create alarm for time setting DEFINED
+    if(type === "defined") {
+
+        // Organzize variables
+        let hours = values[0], minutes = values[1];
+
+        // Create alarm
+        chrome.alarms.create(type, {delayInMinutes: minutes + (hours * 60)});
+    } 
+    
+    // Create alarms for time setting POMODORO
+    else if(type === "pomodoro") {
+
+        // Organize variables
+        let zoneMinutes = values[0], breakMinutes = values[1], cicles = values[2], inZone = values[3];
+        let cicleMinutes = zoneMinutes + breakMinutes;
+        let periods = cicles * 2;
+
+        // Set first period on (first zone time)
+        inZone.pomoStatus[0] = "zone";
+        const now = new Date(Date.parse(inZone.startDateTime));
+        const blank = new Date();
+        
+        // Create different alarms for zone time, break time and last break time
+        for(let i = 0, j = 0; i < periods; i += 2, j++) {
+
+            // END of ZONE TIME alarms
+            chrome.alarms.create("pomo " + i.toString(), {delayInMinutes: (j * cicleMinutes) + zoneMinutes});
+            
+            // END of BREAK TIME alarms (the last break has a hint in its name)
+            let breakString = (i + 1 == periods - 1) ? "pomo last" : "pomo " + (i + 1).toString();
+            chrome.alarms.create(breakString, {delayInMinutes: (j * cicleMinutes) + cicleMinutes});
+
+            // Set END of ZONE TIME dates to inZone object
+            blank.setTime(now.getTime() + ((j * cicleMinutes * 60) + (zoneMinutes * 60)) * 1000);
+            inZone.pomoDates[i] = blank.toString();
+
+            // Set END of BREAK TIME dates to inZone object
+            blank.setTime(now.getTime() + ((j * cicleMinutes * 60) + (cicleMinutes * 60)) * 1000);
+            inZone.pomoDates[i + 1] = blank.toString();
+
+        }
+
+        // Persist changes
+        chrome.storage.sync.set({ inZone });
+    }
+}
 
 
 // Add sites to block list when button is clicked
