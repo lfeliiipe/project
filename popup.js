@@ -211,32 +211,12 @@ zoneButton.addEventListener("click", () => {
         
         // Persist changes
         chrome.storage.sync.set({ inZone });
-
-        /*
-        // Send inZone as a message to background script
-        chrome.runtime.sendMessage(inZone, () => {
-
-            // Redirect the page on response
-            let url = chrome.runtime.getURL("zone_page.html");
-            window.location.assign(url);
-
-        });
-       
-        // Create alarms based on time settings
-        if(inZone.timeSetting === "defined") {
-            chrome.alarms.create("defined", {
-                delayInMinutes: inZone.definedSettings.minutes + (inZone.definedSettings.hours * 60)
-            });
-            console.log("ALARME COMEÇADO NO POPUP");
-        } else if(inZone.timeSetting === "pomodoro") {
-
-        }
-        */
         
     });
 });
 
 
+// Calculate and set alarms for DEFINED and POMODORO time settings
 function createAlarm(type, values) {
     
     // Create alarm for time setting DEFINED
@@ -311,3 +291,89 @@ form1.addEventListener("submit", function () {
         showList();
     });
 });
+
+
+// --- LOGIN RELATED CODE ---
+
+// Get an authorization token from the user then load information
+function login() {
+
+    // The true parameter ensures the token call to be interactive
+    loadUserInfo(true);
+}
+
+
+// Function decorated by tokenRequired (from oauth.js)
+function revokeAccess(token) {
+    
+    // Revoke token from google database
+    fetch('https://accounts.google.com/o/oauth2/revoke?token=' + token);
+
+    // Remove token from cache
+    chrome.identity.removeCachedAuthToken({token: token}, () => {
+        alert("You have been removed");
+    });
+
+    // Refresh
+    location.reload();
+
+}
+revokeAccess = tokenRequired(revokeAccess);
+    
+
+// Function decorated by tokenRequired (from oauth.js)
+async function loadUserInfo(token) {
+
+    // Load content for user not logged into the extension
+    if(!token) {
+        const loginButton = document.getElementById("login_button");
+        let userinfo = await chrome.identity.getProfileUserInfo({accountStatus: "ANY"});
+        loginButton.innerHTML = "Login";
+        loginButton.onclick = login;
+
+        // Show option to log using the same email logged into the chrome browser
+        if(userinfo.email) {
+            loginButton.innerHTML += " with " + userinfo.email;
+            loginButton.title = "Login using the account logged in chrome"
+        }
+        return;
+    }
+
+    // Get user info from google (name, email, picture...)
+    let init = {
+        method: 'GET',
+        async: true,
+        headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json'
+        },
+        'contentType': 'json'
+    };
+    
+    fetch('https://www.googleapis.com/oauth2/v3/userinfo?access_token' + token, init)
+    .then((response) => response.json())
+    .then(function(data) {
+
+        console.log("user data from google: ", data);
+
+        // Load image
+        const img = document.getElementById("profile_pic");
+        img.src = data.picture;
+        img.style.display = "inline";
+
+        // Display info
+        const profile_div = document.getElementById("profile_div");
+        profile_div.style.display = "inline";
+        profile_div.innerHTML = "<p style='display:inline'>" + data.name + "</p>";
+
+        // Change button
+        const loginButton = document.getElementById("login_button");
+        loginButton.innerHTML = "Logout";
+        loginButton.onclick = revokeAccess;
+    })
+}
+loadUserInfo = tokenRequired(loadUserInfo);
+
+
+// Load user info when the page finishes loading
+document.addEventListener("DOMContentLoaded", loadUserInfo);

@@ -5,7 +5,7 @@ chrome.storage.sync.get("inZone", ({ inZone }) => {
     updateZoneStatus();
     
     // Turn zone mode off using button
-    const zoneOff = document.getElementById("zoneOff").addEventListener("click", clearTimer(inZone));
+    document.getElementById("zoneOff").addEventListener("click", clearTimer(inZone));
 
     // Set timers based on time settings
     switch(inZone.timeSetting) {
@@ -188,6 +188,7 @@ function updateZoneStatus() {
             zoneStatus.innerHTML = "You've finished ";
             document.getElementById("div_time").style.display = "none";
             div_periods.style.display = "none";
+            document.getElementById("zoneOff").disabled = "true";
         } else if(inZone.started && !inZone.isOn) {
             zoneStatus.innerHTML = ">> <i>BREAK</i> << Time";
         } else if(inZone.started && inZone.isOn) {

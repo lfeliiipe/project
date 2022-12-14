@@ -4,21 +4,21 @@ body {
   background-color: green;
 }
 
-button:enabled {
+button {
     outline: none;
     margin: 10px;
     border: none;
-    border-radius: 2px;
-    background: blue;
+    border-radius: 10px;
+    background: #3C79F8;
     padding: 30px 10px;
     text-align: center;
   }
 
-  #zoneButton:disabled {
+  #zoneButton:active {
     outline: none;
     margin: 10px;
     border: none;
-    border-radius: 2px;
+    border-radius: 10%;
     padding: 30px 10px;
     text-align: center;
     background: gray;
@@ -36,4 +36,17 @@ button:enabled {
 
   #form2 {
     background-color: orange;
+  }
+
+  #profile_pic {
+    width: 100px;
+    background-color: white;
+    border-radius: 50%;
+    text-align: center;
+  }
+
+  #login_button {
+    padding: 10px;
+    background-color: #3C79F8;
+    display: block;
   }

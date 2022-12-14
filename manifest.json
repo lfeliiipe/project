@@ -6,7 +6,11 @@
     "background": {
       "service_worker": "background.js"
     },
-    "permissions": ["alarms", "notifications", "storage", "scripting", "webNavigation"],
+    "oauth2": {
+      "client_id": "144113858899-uc9f84basj6124a7gs1239ba4tiv1i3d.apps.googleusercontent.com",
+        "scopes":["openid email profile"]
+    },
+    "permissions": ["alarms", "identity", "identity.email", "notifications", "storage", "scripting", "webNavigation"],
     "host_permissions": ["<all_urls>"],
     "action": {
       "default_popup": "popup.html"
