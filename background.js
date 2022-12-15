@@ -1,3 +1,7 @@
+// Import login/authentication related functions
+import { initCache } from "./oauth.js";
+
+
 // Initialize inZone object and blockList using storage API
 chrome.runtime.onInstalled.addListener(() => {
 
@@ -30,8 +34,9 @@ chrome.runtime.onInstalled.addListener(() => {
             console.log("array blocklist criado", blockList);
         }
 
+        // Initialize cache on session storage
+        initCache();
     });
-    
 });
 
 
@@ -43,7 +48,7 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 
         // Abort injecting script in the extension's pages
         const notAllowedUrls = ["chrome://", "chrome-extension://"];
-        for (site of notAllowedUrls) {
+        for (let site of notAllowedUrls) {
             if (details.url.includes(site)) {
                 console.log(details.url + " contem " + site + " por isso nao injetou");
                 return;
@@ -112,6 +117,10 @@ chrome.alarms.onAlarm.addListener((alarm) => {
         }
     }
 });
+
+
+// Initialize session cache on startup (initCache from oauth.js)
+chrome.runtime.onStartup.addListener(initCache);
 
 
 // Update inZone object when zone time is over

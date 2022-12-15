@@ -1,3 +1,6 @@
+// Import login/authentication related functions
+import { tokenRequired, initCache } from "./oauth.js";
+
 // Append link to zone page when zone time is on
 const zone_page_link = document.getElementById("zone_page_link");
 chrome.storage.sync.get("inZone", ({ inZone }) => {
@@ -295,15 +298,17 @@ form1.addEventListener("submit", function () {
 
 // --- LOGIN RELATED CODE ---
 
-// Get an authorization token from the user then load information
-function login() {
 
-    // The true parameter ensures the token call to be interactive
-    loadUserInfo(true);
+// Get an authorization token from the user then load information
+async function login() {
+
+    // True parameter means authorization token request in interactive mode (initCache from oauth.js)
+    await initCache(true);
+    loadUserInfo();
 }
 
 
-// Function decorated by tokenRequired (from oauth.js)
+// Log user out (Function decorated by tokenRequired from oauth.js)
 function revokeAccess(token) {
     
     // Revoke token from google database
@@ -314,18 +319,24 @@ function revokeAccess(token) {
         alert("You have been removed");
     });
 
-    // Refresh
-    location.reload();
+    // Remove user info from cache
+    chrome.storage.session.clear();
 
+    // Refresh page
+    location.reload();
 }
 revokeAccess = tokenRequired(revokeAccess);
-    
+ 
 
-// Function decorated by tokenRequired (from oauth.js)
-async function loadUserInfo(token) {
+// Load user related info
+async function loadUserInfo() {
+    
+    // Populate user info from cache
+    const userInfo = await chrome.storage.session.get();
+    console.log("userInfo: ", userInfo);
 
     // Load content for user not logged into the extension
-    if(!token) {
+    if(!userInfo.logged) {
         const loginButton = document.getElementById("login_button");
         let userinfo = await chrome.identity.getProfileUserInfo({accountStatus: "ANY"});
         loginButton.innerHTML = "Login";
@@ -339,40 +350,21 @@ async function loadUserInfo(token) {
         return;
     }
 
-    // Get user info from google (name, email, picture...)
-    let init = {
-        method: 'GET',
-        async: true,
-        headers: {
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/json'
-        },
-        'contentType': 'json'
-    };
-    
-    fetch('https://www.googleapis.com/oauth2/v3/userinfo?access_token' + token, init)
-    .then((response) => response.json())
-    .then(function(data) {
+     // Load image
+     const img = document.getElementById("profile_pic");
+     img.src = userInfo.img;
+     img.style.display = "inline";
 
-        console.log("user data from google: ", data);
+     // Display info
+     const profile_div = document.getElementById("profile_div");
+     profile_div.style.display = "inline";
+     profile_div.innerHTML = "<p style='display:inline'>" + userInfo.name + "</p>";
 
-        // Load image
-        const img = document.getElementById("profile_pic");
-        img.src = data.picture;
-        img.style.display = "inline";
-
-        // Display info
-        const profile_div = document.getElementById("profile_div");
-        profile_div.style.display = "inline";
-        profile_div.innerHTML = "<p style='display:inline'>" + data.name + "</p>";
-
-        // Change button
-        const loginButton = document.getElementById("login_button");
-        loginButton.innerHTML = "Logout";
-        loginButton.onclick = revokeAccess;
-    })
+     // Change button
+     const loginButton = document.getElementById("login_button");
+     loginButton.innerHTML = "Logout";
+     loginButton.onclick = revokeAccess;
 }
-loadUserInfo = tokenRequired(loadUserInfo);
 
 
 // Load user info when the page finishes loading

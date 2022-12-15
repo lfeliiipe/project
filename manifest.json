@@ -4,7 +4,8 @@
     "version": "1.0",
     "manifest_version": 3,
     "background": {
-      "service_worker": "background.js"
+      "service_worker": "background.js",
+      "type": "module"
     },
     "oauth2": {
       "client_id": "144113858899-uc9f84basj6124a7gs1239ba4tiv1i3d.apps.googleusercontent.com",
