@@ -4,7 +4,7 @@ import { tokenRequired, initCache } from "./oauth.js";
 // Append link to zone page when zone time is on
 const zone_page_link = document.getElementById("zone_page_link");
 chrome.storage.sync.get("inZone", ({ inZone }) => {
-    if (inZone.started) {
+    if(inZone.started) {
         const zp_link = document.createElement("a");
         zp_link.href = "zone_page.html";
         zp_link.innerHTML = "ZONE TIMER";
@@ -70,18 +70,27 @@ const pomo = document.getElementById("pomo_radio");
 const def = document.getElementById("def_radio");
 if (!und.checked && !pomo.checked && !def.checked) {
     zoneButton.style.display = "none";
-    console.log("apagou o botaozao");
 }
 
 
 // Add listeners on radio buttons
 const inputs = document.getElementsByTagName("input");
-for (const input of inputs) {
-    if (input.type === "radio") {
-        console.log("input type é: ", input.type);
-        input.onchange = showTimeSettings;
+async function updateRadios () {
+
+    // Retrieve data from storage 
+    const { inZone } = await chrome.storage.sync.get("inZone");
+    for (const input of inputs) {
+        if (input.type === "radio" && input.name.includes("set_time")) {
+
+            // Disable radio buttons in zone mode
+            if(inZone.started) input.disabled = true;
+    
+            input.onchange = showSettings;
+        }
     }
 }
+updateRadios();
+
 
 // Hide divs
 const div_pomodoro = document.getElementById("div_pomodoro");
@@ -89,8 +98,10 @@ const div_defined = document.getElementById("div_defined");
 div_pomodoro.style.display = "none";
 div_defined.style.display = "none";
 
-// Show zoneButton and divs when any radio button is clicked
-function showTimeSettings() {
+// Display settings when any radio button is clicked
+async function showSettings() {
+
+    // Display time settings
     switch(this.id) {
         case "und_radio":
             div_pomodoro.style.display = "none";
@@ -108,9 +119,6 @@ function showTimeSettings() {
             div_pomodoro.style.display = "none";
             div_defined.style.display = "block";
             zoneButton.style.display = "block";
-            break;
-
-        default:
             break;
     }
 }
@@ -145,8 +153,10 @@ function removeNodes(element) {
 }
 
 
-// When the button is clicked update inZone object
-zoneButton.addEventListener("click", () => {
+// When the button is clicked update inZone and fileSettings object
+zoneButton.addEventListener("click", async () => {
+
+    // inZone updates
     chrome.storage.sync.get("inZone", ({ inZone }) => {
         
         // Turn zone on
@@ -173,6 +183,7 @@ zoneButton.addEventListener("click", () => {
         let milis = 0;
         const endDate = new Date();
         switch (inZone.timeSetting) {
+
             case "pomodoro":
                 let zoneMinutes = parseInt(document.getElementById("zone_minutes").value);
                 let breakMinutes = parseInt(document.getElementById("break_minutes").value);
@@ -189,6 +200,7 @@ zoneButton.addEventListener("click", () => {
                 // Persist changes
                 chrome.storage.sync.set({ inZone });
 
+                // Set pomodoro alarms
                 createAlarm("pomodoro", [zoneMinutes, breakMinutes, cicles, inZone]);
                 break;
 
@@ -204,17 +216,22 @@ zoneButton.addEventListener("click", () => {
                 
                 // Persist changes
                 chrome.storage.sync.set({ inZone });
-                
-                createAlarm("defined", [hours, minutes]);
-                break;
 
-            default:
+                // Set alarm for defined time setting
+                createAlarm("defined", [hours, minutes]);   
                 break;
         }
         
+        // Filter user input to save session name
+        let sessionName = document.getElementById("session_label").value;
+        inZone.sessionName = sessionName.replace(/[^a-z0-9áéíóúñü \.,_-]/gim,"").trim();
+
         // Persist changes
         chrome.storage.sync.set({ inZone });
-        
+
+        // Redirect user to zone page
+        let url = chrome.runtime.getURL("zone_page.html");
+        location.assign(url);
     });
 });
 
@@ -262,7 +279,6 @@ function createAlarm(type, values) {
             // Set END of BREAK TIME dates to inZone object
             blank.setTime(now.getTime() + ((j * cicleMinutes * 60) + (cicleMinutes * 60)) * 1000);
             inZone.pomoDates[i + 1] = blank.toString();
-
         }
 
         // Persist changes
@@ -274,7 +290,9 @@ function createAlarm(type, values) {
 // Add sites to block list when button is clicked
 let form1 = document.getElementById("form1");
 form1.addEventListener("submit", function () {
-    let value = document.getElementById("input1").value;
+
+    // Filter characters from user input
+    let value = document.getElementById("input1").value.replace(/[^a-z0-9áéíóúñü \.,_-]/gim,"").trim();
 
     // Make sure field is not empty
     if (value === "") {
@@ -333,7 +351,6 @@ async function loadUserInfo() {
     
     // Populate user info from cache
     const userInfo = await chrome.storage.session.get();
-    console.log("userInfo: ", userInfo);
 
     // Load content for user not logged into the extension
     if(!userInfo.logged) {

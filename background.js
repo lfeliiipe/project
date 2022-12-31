@@ -1,41 +1,33 @@
-// Import login/authentication related functions
+// Import login/authentication and API related functions
+import { uploadSession, notify, resetStorageObjs } from "./helpers.js";
 import { initCache } from "./oauth.js";
 
-
-// Initialize inZone object and blockList using storage API
+// Initialize user info cache and necessary objects using storage API
 chrome.runtime.onInstalled.addListener(() => {
 
     // Retrieve all items from storage API
-    chrome.storage.sync.get(null, (items) => {
+    chrome.storage.sync.get(null, async (items) => {
         console.log("entrou no listener e no storage get no oninstalled");
 
         // Initialize inZone object
-        if (!items.inZone) {
-            const inZone = {
-                isOn: false, 
-                isCompleted: false,
-                started: false,
-                startDateTime: "", 
-                endDateTime: "",
-                timeSetting: "",
-                definedSettings: {},
-                pomoSettings: {},
-                pomoStatus: [],
-                pomoDates: [],
-            };
-            chrome.storage.sync.set({ inZone });
-            console.log("objeto inzone criado", inZone);
+        if(!items.inZone) {
+            await resetStorageObjs("inZone");  
         }
 
         // Initialize blockList
-        if (!items.blockList) {
-            const blockList = [];
-            chrome.storage.sync.set({ blockList });
-            console.log("array blocklist criado", blockList);
+        if(!items.blockList) {
+            await resetStorageObjs("blockList");
+            
+        }
+
+        // Initialize file settings
+        if(!items.fileSettings) {
+            await resetStorageObjs("fileSettings");
+            
         }
 
         // Initialize cache on session storage
-        initCache();
+        await initCache();
     });
 });
 
@@ -50,7 +42,6 @@ chrome.webNavigation.onCommitted.addListener((details) => {
         const notAllowedUrls = ["chrome://", "chrome-extension://"];
         for (let site of notAllowedUrls) {
             if (details.url.includes(site)) {
-                console.log(details.url + " contem " + site + " por isso nao injetou");
                 return;
             }
         }
@@ -59,12 +50,11 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 
         // Abort if there's no block list
         if (!items.blockList) {
-            console.log("nao injetou pq nao existe blocklist");
             return;
         }
 
         // Redirect if current url is in the block list and inZone mode is on
-        for (site of items.blockList) {
+        for (let site of items.blockList) {
             if (details.url.includes(site) && (items.inZone.isOn)) {
                 console.log("listener de navegação ouviu e injetou script ao acessar: ", details.url);
         
@@ -82,12 +72,19 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 
 
 // Listen for alarms
-chrome.alarms.onAlarm.addListener((alarm) => {
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+
+    // Deal with chrome.alarms bug when service worker goes idle (alarm triggering twice)
+    let { inZone } = await chrome.storage.sync.get("inZone"); 
+    if(inZone.lastAlarmName === alarm.name) return;
+    inZone.lastAlarmName = alarm.name;
+    chrome.storage.sync.set({ inZone });
     
     // Alarm for DEFINED time setting
     if(alarm.name === "defined") {
         endZoneTime(true);
         notify("Session is over!");
+        await uploadSession();
     }
 
     // Alarms for POMODORO time setting
@@ -102,17 +99,18 @@ chrome.alarms.onAlarm.addListener((alarm) => {
         switch(pomoIndex) {
             case "zone":
                 endZoneTime();
-                notify("Zone time is over!");
+                notify("Zone time is over!\nTake a break!");
                 break;
             
             case "break":
                 endBreakTime();
-                notify("Break time is over!");
+                notify("Break time is over!\nGet in the zone!");
                 break;
 
             case "last":
                 endBreakTime(true);
                 notify("Pomodoro session is over!");
+                await uploadSession();
                 break;
         }
     }
@@ -126,8 +124,8 @@ chrome.runtime.onStartup.addListener(initCache);
 // Update inZone object when zone time is over
 function endZoneTime(completed=false) {
     chrome.storage.sync.get("inZone", ({ inZone }) => {
-        
-        // Completed true means DEFINED time setting, in this case pomoStatus doesn't change 
+
+        // Completed true means DEFINED time setting (session is over), in this case pomoStatus doesn't change 
         if(completed) {
             inZone.isCompleted = true;
         } else {
@@ -156,19 +154,4 @@ function endBreakTime(completed=false) {
 
         chrome.storage.sync.set({ inZone });
     });
-}
-
-
-// Notify user with messages to indicate end of zone or break time
-function notify(msg) {
-    chrome.notifications.create({
-        iconUrl: "test.png",
-        type: "basic",
-        title: "Focus Helper and Studdy Logger",
-        message: msg,
-        buttons: [
-          { title: "Keep it Flowing." }
-        ],
-        priority: 0
-      });
 }

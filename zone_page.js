@@ -1,11 +1,15 @@
+// Import time related functions
+import { getDurationVariables, durationToString, uploadSession } from "./helpers.js";
+
 let interval = 0;
+const div_time = document.getElementById("div_time");
 chrome.storage.sync.get("inZone", ({ inZone }) => {
 
     // Show zone mode
     updateZoneStatus();
     
     // Turn zone mode off using button
-    document.getElementById("zoneOff").addEventListener("click", clearTimer(inZone));
+    document.getElementById("zoneOff").addEventListener("click", finishSession(inZone));
 
     // Set timers based on time settings
     switch(inZone.timeSetting) {
@@ -32,11 +36,11 @@ function undefinedRoutine(inZone) {
         
         // Store hours, minutes and seconds since user is in the zone in variables
         const now = new Date();
-        const t = getTimeVariables(now.toString(), inZone.startDateTime);
+        const t = getDurationVariables(now.toString(), inZone.startDateTime);
         let h = t[0], m = t[1], s = t[2];
 
         // Display timer
-        showTimer(h, m, s);
+        durationToString(h, m, s, div_time);
     }, 1000);
 }
 
@@ -57,22 +61,20 @@ function pomodoroRoutine(inZone) {
 
         // Get hour, minute and second to the end of the period in variables
         const now = new Date();
-        const t = getTimeVariables(inZone.pomoDates[currentPeriod], now.toString());
+        const t = getDurationVariables(inZone.pomoDates[currentPeriod], now.toString());
         let h = t[0], m = t[1], s = t[2];
 
         // Display timer
-        showTimer(h, m, s);
+        durationToString(h, m, s, div_time);
 
         // (Base Case) Stop the interval when the current period is over and there's no more periods to count
         if (s == 0 && m == 0 && h == 0 && currentPeriod >= inZone.pomoDates.length - 1) {
-            console.log("entrou no if de limpar o interval: ", interval);
             updateZoneStatus();
             clearInterval(interval);
         }
 
         // (Recursive case) Call itself when period is over and update current period and periods nodes
         else if (s == 0 && m == 0 && h == 0 && currentPeriod <= inZone.pomoDates.length - 1) {
-            console.log("entrou no if de ++ no current");
             currentPeriod++;
             createPeriods(periods, currentPeriod, "update");
             pomodoroTimer();
@@ -117,11 +119,11 @@ function definedRoutine(inZone) {
 
         // Store hours, minutes and seconds to the end of zone time in variables
         const now = new Date();
-        const t = getTimeVariables(inZone.endDateTime, now.toString());
+        const t = getDurationVariables(inZone.endDateTime, now.toString());
         let h = t[0], m = t[1], s = t[2];
 
         // Display timer
-        showTimer(h, m, s);
+        durationToString(h, m, s, div_time);
 
         // Stop timer when time is over
         if (s == 0 && m == 0 && h == 0) {
@@ -132,48 +134,28 @@ function definedRoutine(inZone) {
 }
 
 
-// Return the diference of two dates in hour, minute and second variables (in an array)
-function getTimeVariables(endDateString, startDateString) {
-    const end = Date.parse(endDateString);
-    const start = Date.parse(startDateString);
-    let totalSecs = Math.trunc((end - start)/1000);
-    
-    let h = Math.trunc(Math.trunc(totalSecs / 60) / 60);
-    let m = Math.trunc(totalSecs / 60) - (h * 60);
-    let s = totalSecs % 60;
-    
-    return [h, m, s];
-}
-
-
-// Display timer
-const div_time = document.getElementById("div_time");
-function showTimer(h, m, s) {
-    div_time.innerHTML = h.toString().padStart(2, "0") + " : " + 
-                         m.toString().padStart(2, "0") + " : " +
-                         s.toString().padStart(2, "0");
-}
-
-
 // Stop timers using button
-function clearTimer(inZone) {
-    return function() {
+function finishSession(inZone) {
+    return async function() {
 
         // Update inZone 
         const d = new Date();
         inZone.endDateTime = d.toString();
         inZone.isOn = false;
         inZone.isCompleted = true;
+        inZone.stopped = true;
         chrome.storage.sync.set({ inZone });
         
         // Stop timers
         clearInterval(interval);
-        showTimer(0, 0, 0);
+        durationToString(0, 0, 0, div_time);
         chrome.alarms.clearAll();
 
         // Show zone mode
         updateZoneStatus();
-        
+
+        // Upload to drive
+        await uploadSession();
     }
 }
 
@@ -190,9 +172,9 @@ function updateZoneStatus() {
             div_periods.style.display = "none";
             document.getElementById("zoneOff").disabled = "true";
         } else if(inZone.started && !inZone.isOn) {
-            zoneStatus.innerHTML = ">> <i>BREAK</i> << Time";
+            zoneStatus.innerHTML = ">> <b><i>BREAK</i></b> << Time";
         } else if(inZone.started && inZone.isOn) {
-            zoneStatus.innerHTML = "You're in the >> <i>ZONE</i> <<";
+            zoneStatus.innerHTML = "You're in the >> <b><i>ZONE</i></b> <<";
         } else if(!inZone.started) {
             zoneStatus.style.display = "none";
         } 

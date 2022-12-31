@@ -3,13 +3,23 @@
     "description": "Extension to help you studying/working",
     "version": "1.0",
     "manifest_version": 3,
+    "icons": {
+      "16": "./imgs/icon.png",
+      "32": "./imgs/icon.png",
+      "48": "./imgs/icon.png",
+      "128": "./imgs/icon.png"
+    },
     "background": {
       "service_worker": "background.js",
       "type": "module"
     },
+    "options_page": "options.html",
     "oauth2": {
       "client_id": "144113858899-uc9f84basj6124a7gs1239ba4tiv1i3d.apps.googleusercontent.com",
-        "scopes":["openid email profile"]
+        "scopes":[
+          "openid email profile", "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/drive.metadata.readonly"
+        ]
     },
     "permissions": ["alarms", "identity", "identity.email", "notifications", "storage", "scripting", "webNavigation"],
     "host_permissions": ["<all_urls>"],

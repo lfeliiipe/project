@@ -4,54 +4,58 @@
         <link rel="stylesheet" href="styles.css">
     </head>
     <body>
-        <form id="form1">
-            <input id="input1" type="text" placeholder="Add sites to your block list">
-            <button id="bf1" type="submit">Add</button>
-        </form>
-        <div id="listDiv"></div>
-        <p>TIME SETTINGS</p>
-        <form id="form2">
+        <div class="container">
+            <img id="profile_pic" alt="Profile Picture" src="./imgs/default_picture.png">
+            <span id="profile_div"></span>
+            <form id="form1">
+                <input id="input1" type="text" placeholder="Add sites to your block list">
+                <button id="bf1" type="submit">Add</button>
+            </form>
+            <div id="listDiv"></div>
+            <div id="time_settings">
+                <p>TIME SETTINGS</p>
+                <form id="form2">
 
-            <div id="und_div">
-                <input type="radio" id="und_radio" name="set_time" value="undefined">
-                <label for="undefined">Undefined</label>
+                    <div id="und_div">
+                        <input type="radio" id="und_radio" name="set_time" value="undefined">
+                        <label for="undefined">Undefined</label>
+                    </div>
+                    <div id="pomo_div">
+                        <input type="radio" id="pomo_radio" name="set_time" value="pomodoro">
+                        <label for="pomodoro">Pomodoro Sessions</label>
+                    </div>
+                    <div id="def_div">
+                        <input type="radio" id="def_radio" name="set_time" value="defined">
+                        <label for="defined">Defined</label>
+                    </div>
+
+                    <div id="div_pomodoro">
+                        <input type="number" id="sessions" min="1" max="10" value="1">
+                        <label for="sessions">Sessions</label> <br>
+                        <input type="number" min="0" max="59" id="zone_minutes" value="25">
+                        <label for="zone_minutes">Zone Minutes</label>
+                        <input type="number" min="0" max="59" id="break_minutes" value="5">
+                        <label for="break_minutes">Break Minutes</label>
+                    </div>
+
+                    <div id="div_defined">
+                        <input type="number" min="0" max="23" id="hours" value="0">
+                        <label for="hours">Hours</label>
+                        <input type="number" min="0" max="59" id="minutes" value="30">
+                        <label for="minutes">Minutes</label>
+                    </div>     
+                    
+                    <div>
+                        <label for="session_label">Label your session</label>
+                        <input id="session_label" type="text" value="Session 1">                    
+                    </div>
+
+                    <button id="zoneButton" type="submit" display="none">GET IN THE ZONE</button>
+                    <div id="zone_page_link"></div>
+                </form>
+                <button id="login_button">Log</button>
             </div>
-            <div id="pomo_div">
-                <input type="radio" id="pomo_radio" name="set_time" value="pomodoro">
-                <label for="pomodoro">Pomodoro Sessions</label>
-            </div>
-            <div id="def_div">
-                <input type="radio" id="def_radio" name="set_time" value="defined">
-                <label for="defined">Defined</label>
-            </div>
-
-            
-            
-
-            <div id="div_pomodoro">
-                <input type="number" id="sessions" min="1" max="10" value="1">
-                <label for="sessions">Sessions</label> <br>
-                <input type="number" min="0" max="59" id="zone_minutes" value="25">
-                <label for="zone_minutes">Zone Minutes</label>
-                <input type="number" min="0" max="59" id="break_minutes" value="5">
-                <label for="break_minutes">Break Minutes</label>
-            </div>
-
-            <div id="div_defined">
-                <input type="number" min="0" max="23" id="hours" value="0">
-                <label for="hours">Hours</label>
-                <input type="number" min="0" max="59" id="minutes" value="30">
-                <label for="minutes">Minutes</label>
-            </div>            
-            <button id="zoneButton" type="submit" display="none">GET IN THE ZONE</button>
-            <div id="zone_page_link"></div>
-        </form>
-        <img id="profile_pic" alt="Profile Picture" src="default_picture.png">
-        <span id="profile_div"></span>
-
-        <button id="login_button">Log</button>
-
-        <script type="module" src="oauth.js"></script>
+        </div>
         <script type="module" src="popup.js"></script>
     </body>
 </html>

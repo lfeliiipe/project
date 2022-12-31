@@ -1,52 +1,83 @@
 body {
-  height: 555px;
   width: 332px;
-  background-color: green;
+  height: auto;
+  background-color:  #000000c9;
 }
 
 button {
-    outline: none;
-    margin: 10px;
-    border: none;
-    border-radius: 10px;
-    background: #3C79F8;
-    padding: 30px 10px;
-    text-align: center;
-  }
+  outline: none;
+  margin: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #3C79F8;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+}
 
-  #zoneButton:active {
-    outline: none;
-    margin: 10px;
-    border: none;
-    border-radius: 10%;
-    padding: 30px 10px;
-    text-align: center;
-    background: gray;
-  }
+input {
+  border-radius: 0.8rem;
+  text-align: center;
+  margin: 2px 0px 2px 0px;
+}
 
-  div {
-    background-color: orange;
-  }
+input[type="text"] {
+  width: 200px;
+}
 
-  p {
-    text-align: center;
-    background-color: white;
-    margin-bottom: 0px;
-  }
+button:disabled {
+  cursor: not-allowed;
+}
 
-  #form2 {
-    background-color: orange;
-  }
+div {
+  background-color: orange;
+  border-radius: 0.8rem;
+}
 
-  #profile_pic {
-    width: 100px;
-    background-color: white;
-    border-radius: 50%;
-    text-align: center;
-  }
+p {
+  text-align: center;
+  background-color: white;
+  margin-bottom: 0px;
+  margin-bottom: 0px;
+  border-top-right-radius: 0.8rem;
+  border-top-left-radius: 0.8rem;
+}
 
-  #login_button {
-    padding: 10px;
-    background-color: #3C79F8;
-    display: block;
-  }
+#form2 {
+  background-color: orange;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#profile_pic {
+  width: 60px;
+  background-color: white;
+  border-radius: 50%;
+  border-style: solid;
+  border-color:  rgba(0,0,0,.7);
+}
+
+.container {
+  background-color:  rgba(0,0,0,.2);
+  border-radius: 0.8rem;
+  padding-top: 10%;
+  padding-bottom: 10%;
+  padding-left: 2%;
+  padding-right: 2%;
+}
+
+#zone_status, #div_time {
+  text-align: center;
+}
+
+#div_time {
+  font-size: xxx-large;
+}
+
+span p {
+  text-align: center;
+  padding: 2px 10px 2px 10px;
+  border-radius: 0.8rem;
+}

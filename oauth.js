@@ -12,7 +12,6 @@ function tokenRequired(fn) {
         // If the user isn't logged a token is not returned
         catch(err) {
             console.log("tokenRequired Exception: ", err);
-            return fn("");
         }
     }
 }
@@ -21,10 +20,7 @@ function tokenRequired(fn) {
 // Cache user info in storage.session (Decorated by tokenRequired)
 async function initCache(token) {
 
-    // Quit if user is not logged (there's not a token)
-    if(!token) return;
-
-     // Get user info from google (name, email, picture...)
+     // Get user info from google (name, picture)
      let init = {
         method: 'GET',
         async: true,
@@ -36,15 +32,14 @@ async function initCache(token) {
     };
     await fetch('https://www.googleapis.com/oauth2/v3/userinfo?access_token' + token, init)
     .then((response) => response.json())
-    .then(function(data) {
+    .then((data) => {
 
-        // Quit if google data doesn't have this property
+        // Quit if response data doesn't have this property
         if(!data.email_verified === true) return;
 
         // Populate cache
         const cacheUser = { logged: true };
         cacheUser.name = data.name;
-        cacheUser.email = data.email;
         cacheUser.img = data.picture;
         chrome.storage.session.set(cacheUser);
     })
