@@ -35,8 +35,13 @@ chrome.storage.sync.get("inZone", ({ inZone }) => {
 // Calculate and display time for undefined time setting
 function undefinedRoutine(inZone) {
     
+    // Show timer 
+    routine();
+
     // Zone interval timer
-    interval = setInterval(function() {
+    interval = setInterval(routine, 1000);
+
+    function routine() {
         
         // Store hours, minutes and seconds since user is in the zone in variables
         const now = new Date();
@@ -45,7 +50,7 @@ function undefinedRoutine(inZone) {
 
         // Display timer
         durationToString(h, m, s, div_time);
-    }, 1000);
+    }
 }
 
 
@@ -57,19 +62,18 @@ function pomodoroRoutine(inZone) {
     let periods = inZone.pomoSettings.cicles * 2;
     createPeriods(periods, currentPeriod, "create");
 
+    // Show timer
+    routine();
+
     // Set interval to display pomdoro timers
     interval = setInterval(function pomodoroTimer() {
 
         // Show zone mode
         updateZoneStatus();
 
-        // Get hour, minute and second to the end of the period in variables
-        const now = new Date();
-        const t = getDurationVariables(inZone.pomoDates[currentPeriod], now.toString());
+        // Show timer
+        const t = routine();
         let h = t[0], m = t[1], s = t[2];
-
-        // Display timer
-        durationToString(h, m, s, div_time);
 
         // (Base Case) Stop the interval when the current period is over and there's no more periods to count
         if (s == 0 && m == 0 && h == 0 && currentPeriod >= inZone.pomoDates.length - 1) {
@@ -85,6 +89,18 @@ function pomodoroRoutine(inZone) {
         }
     }, 1000);
 
+    function routine() {
+
+        // Get hour, minute and second to the end of the period in variables
+        const now = new Date();
+        const t = getDurationVariables(inZone.pomoDates[currentPeriod], now.toString());
+        let h = t[0], m = t[1], s = t[2];
+
+        // Display timer
+        durationToString(h, m, s, div_time);
+
+        return t;
+    }
 }
 
 
@@ -118,8 +134,24 @@ function createPeriods(periods, currentPeriod, mode) {
 // Calculate and display time for defined time setting
 function definedRoutine(inZone) {
 
+    // Show timer
+    routine();
+
     // Zone interval timer
     interval = setInterval(function() {
+
+        // Show timer
+        const t = routine();
+        let h = t[0], m = t[1], s = t[2];
+
+        // Stop timer when time is over
+        if (s <= 0 && m <= 0 && h <= 0) {
+            clearInterval(interval);
+            updateZoneStatus();
+        }
+    }, 1000);
+
+    function routine() {
 
         // Store hours, minutes and seconds to the end of zone time in variables
         const now = new Date();
@@ -129,12 +161,8 @@ function definedRoutine(inZone) {
         // Display timer
         durationToString(h, m, s, div_time);
 
-        // Stop timer when time is over
-        if (s == 0 && m == 0 && h == 0) {
-            clearInterval(interval);
-            updateZoneStatus();
-        }
-    }, 1000);
+        return t;
+    }
 }
 
 
