@@ -120,12 +120,17 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 // Listen for storage changes and set new popup page
 chrome.storage.sync.onChanged.addListener((changes) => {
     
-    // When a session is started zone_page becomes the popup
-    if (changes.inZone.newValue.started) {
-        chrome.action.setPopup({popup: "zone_page.html"});
-    } else {
-        chrome.action.setPopup({popup: "popup.html"});
+    try {
+        // When a session is started zone_page becomes the popup
+        if (changes.inZone.newValue.started) {
+            chrome.action.setPopup({popup: "zone_page.html"});
+        } else {
+            chrome.action.setPopup({popup: "popup.html"});
+        }
+    } catch(err) {
+        console.log(err);
     }
+    
 });
 
 

@@ -36,6 +36,7 @@ async function resetStorageObjs(objName) {
                 folderName: "Focus Helper and Study Logger",
                 fileName: "",
                 lastFileCreatedDate: "",
+                lastSessionName: ""
             };
             await chrome.storage.sync.set({ fileSettings });
             break;

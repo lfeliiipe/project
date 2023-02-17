@@ -154,10 +154,10 @@ function removeNodes(element) {
 
 
 // When the button is clicked update inZone and fileSettings object
-zoneButton.addEventListener("click", async () => {
+zoneButton.addEventListener("click", () => {
 
     // inZone updates
-    chrome.storage.sync.get("inZone", ({ inZone }) => {
+    chrome.storage.sync.get("inZone", async ({ inZone }) => {
         
         // Turn zone on
         inZone.isOn = true;
@@ -224,10 +224,16 @@ zoneButton.addEventListener("click", async () => {
         
         // Filter user input to save session name
         let sessionName = document.getElementById("session_label").value;
-        inZone.sessionName = sessionName.replace(/[^a-z0-9áéíóúñü \.,_-]/gim,"").trim();
+        sessionName = sessionName.replace(/[^a-z0-9áéíóúñü \.,_-]/gim,"").trim();
+        inZone.sessionName = sessionName;
 
         // Persist changes
         chrome.storage.sync.set({ inZone });
+
+        // Update fileSettings lastSessionName
+        const { fileSettings } = await chrome.storage.sync.get("fileSettings");
+        fileSettings.lastSessionName = sessionName;
+        chrome.storage.sync.set({ fileSettings });
 
         // Redirect user to zone page
         let url = chrome.runtime.getURL("zone_page.html");
@@ -311,6 +317,17 @@ form1.addEventListener("submit", function () {
         // Update div to show block list
         showList();
     });
+});
+
+
+// Add last session name to session name field
+document.addEventListener("DOMContentLoaded", async () => {
+    const { fileSettings } = await chrome.storage.sync.get("fileSettings");
+    const session_label = document.getElementById("session_label");
+    
+    if (fileSettings.lastSessionName) {
+        session_label.value = fileSettings.lastSessionName;
+    }
 });
 
 
