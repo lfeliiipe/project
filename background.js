@@ -32,7 +32,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 
-// Listen for web navigation changes (url changes)
+// Listen for web navigation changes (url changes) and block websites
 chrome.webNavigation.onCommitted.addListener((details) => {
 
     // Retrieve all items from storage API
@@ -113,6 +113,18 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
                 await uploadSession();
                 break;
         }
+    }
+});
+
+
+// Listen for storage changes and set new popup page
+chrome.storage.sync.onChanged.addListener((changes) => {
+    
+    // When a session is started zone_page becomes the popup
+    if (changes.inZone.newValue.started) {
+        chrome.action.setPopup({popup: "zone_page.html"});
+    } else {
+        chrome.action.setPopup({popup: "popup.html"});
     }
 });
 
