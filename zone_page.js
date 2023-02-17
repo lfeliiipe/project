@@ -3,10 +3,14 @@ import { getDurationVariables, durationToString, uploadSession } from "./helpers
 
 let interval = 0;
 const div_time = document.getElementById("div_time");
+const session_info = document.getElementById("session_info");
 chrome.storage.sync.get("inZone", ({ inZone }) => {
 
     // Show zone mode
     updateZoneStatus();
+
+    // Show information about the session
+    showSessionInfo(inZone);
     
     // Turn zone mode off using button
     document.getElementById("zoneOff").addEventListener("click", finishSession(inZone));
@@ -157,6 +161,13 @@ function finishSession(inZone) {
         // Upload to drive
         await uploadSession();
     }
+}
+
+
+// Show information about the session
+function showSessionInfo(inZone) {
+    session_info.innerHTML = "<span>Session Name: " + inZone.sessionName + " </span>" +
+                             "<span>Session Type: " + inZone.timeSetting + " </span>";
 }
 
 
