@@ -73,14 +73,24 @@ function durationToString(h, m, s, element=false) {
 
 
 // Notify user with messages using notifications API
-function notify(msg) {
-    chrome.notifications.create({
+function notify(msg, button=false) {
+
+    // Configure notification
+    const init = {
         iconUrl: "./imgs/icon.png",
         type: "basic",
         title: "Focus Helper and Studdy Logger",
         message: msg,
-        priority: 0
-      });
+        priority: 0,
+    }
+
+    // Add button option if requested
+    if (button) {
+        init.buttons = [{title: "Open File"}]
+    }
+
+    // Create button
+    chrome.notifications.create(init);
 }
 
 
@@ -524,7 +534,7 @@ async function uploadSession(token) {
     if(hasFolder && hasFile) {
         lineCreated = await fetchCalls("create line", token);
         if(lineCreated) {
-            notify("New line added to spreadsheet");
+            notify("New line added to spreadsheet", true);
         } else {
             notify("There was a problem uploading the new session");
         }

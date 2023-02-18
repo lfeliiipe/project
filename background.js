@@ -133,6 +133,18 @@ chrome.storage.sync.onChanged.addListener((changes) => {
 chrome.runtime.onStartup.addListener(initCache);
 
 
+// Open spreadsheet when notification button is clicked
+chrome.notifications.onButtonClicked.addListener(async () => {
+
+    // Get link for spreadsheet
+    const { fileSettings } = await chrome.storage.sync.get("fileSettings");
+    let url = "https://docs.google.com/spreadsheets/d/" + fileSettings.fileId;
+
+    // Open spreadsheet in a new tab
+    chrome.tabs.create({active: true, url: url});
+});
+
+
 // Update inZone object when zone time is over
 function endZoneTime(completed=false) {
     chrome.storage.sync.get("inZone", ({ inZone }) => {
