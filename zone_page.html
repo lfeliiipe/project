@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link href="./bootstrap/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="styles.css">
+        <script src="./bootstrap/bootstrap.bundle.min.js"></script>
     </head>
     <body>
-        <div class="container">
-            <div>
+        <div class="box-blur m-2 p-3">
+            <div class="box-orange mt-3 mb-3">
                 <p id="zone_status"></p>
                 <div id="div_periods"></div>
                 <div id="div_time">--:--:--</div>
             </div>
-            <div id="session_info"></div>
-            <button id="zoneOff">TURN OFF ZONE MODE</button>
+            <div class="card mt-3 mb-3" id="session_info"></div>
+            <button class="btn btn-primary" id="zoneOff">TURN OFF ZONE MODE</button>
             <a href="popup.html">HOME PAGE</a>
         </div>
         <script src="zone_page.js" type="module"></script>

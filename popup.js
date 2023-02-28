@@ -14,53 +14,68 @@ chrome.storage.sync.get("inZone", ({ inZone }) => {
 
 
 // Display block list in a div element
-let listDiv = document.getElementById("listDiv");
+const list_collapse = document.getElementById("list_collapse");
 function showList() {
 
     // Get blockList from storage variable
     chrome.storage.sync.get("blockList", ({ blockList }) => {
 
-        // Create block list header
+        // Create block list table rows
         const len = blockList.length;
-        if (len > 0) {
-            let p = document.createElement("p");
-            let pText = document.createTextNode("BLOCK LIST");
-            p.appendChild(pText);
-            p.style.textAlign = "center";
-            p.style.backgroundColor = "white";
-            listDiv.appendChild(p);
-        }
+        if (!len) return;
 
         // Create and append nodes with blocked sites
         for (let i = 0; i < len; i++) {
             
-            // Create a div for span with website name and delete button
+            // Create a div with website name and delete button
             const div = document.createElement("div");
             div.id = "div" + i;
-            listDiv.appendChild(div);
+            div.className = "row border-2 border-end border-bottom rounded p-2 m-3 " +
+                            "collapse collapse-horizontal show shadow-lg site-collapse";
+            div.title = blockList[i];
+            list_collapse.appendChild(div);
 
-            // Create span with website from block list
+            // Create inner div with website name in a span
+            const span_div = document.createElement("div");
+            span_div.className = "col-6";
+            div.appendChild(span_div);
+
             const span = document.createElement("span");
-            const spanText = document.createTextNode(blockList[i].toUpperCase());
-            span.appendChild(spanText);
-            div.appendChild(span);
+            span.className = "align-middle";
+            span.innerHTML = blockList[i].length > 18 ? blockList[i].slice(0, 18) + "..." : blockList[i];
+            span_div.appendChild(span);
 
-            // Create delete button
+            // Create inner div with delete button
+            const button_div = document.createElement("div");
+            button_div.className = "col-6";
+            div.appendChild(button_div);
+
             const delButton = document.createElement("button");
-            const delButtonText = document.createTextNode("Delete");
-            delButton.appendChild(delButtonText);
+            delButton.innerHTML = "Delete";
             delButton.id = "button" + i;
-            delButton.style.backgroundColor = "red";
-            div.appendChild(delButton);
+            delButton.title = "Remove from block list"
+            delButton.className = "btn btn-danger float-end";
+            delButton.setAttribute("data-bs-toggle", "collapse");
+            delButton.setAttribute("data-bs-target", "#div" + i);
+            delButton.setAttribute("aria-controls", "div" + i);
+            button_div.appendChild(delButton);
         }
 
-        // Add click events to buttons
+        // Add click events to remove websites' collapses and delete buttons
         for (let i = 0; i < len; i++) {
-            document.getElementById("button" + i).addEventListener("click", deleteButton);
+            document.getElementById("div" + i).addEventListener("hidden.bs.collapse", deleteCollapse);
+            document.getElementById("button" + i).addEventListener("click", hideButton);
         }
+                
     });
 }
 showList();
+
+
+// Hide delete button at collapse
+function hideButton () {
+    this.style.display = "none";
+}
 
 
 // Hide zoneButton when radio buttons are not checked
@@ -124,32 +139,27 @@ async function showSettings() {
 }
 
 // Remove websites from block list
-function deleteButton() {
+function deleteCollapse() {
 
     // Search and remove a specific website from the list
-    const deleteSite = this.previousSibling.innerHTML.toLowerCase();
+    const deleteSite = this.title.toLowerCase();
+
+    console.log(deleteSite);
     chrome.storage.sync.get("blockList", ({ blockList }) => {
 
+        // Remove website from storage api
         let len = blockList.length;
         for (let i = 0; i < len; i++) {
             if (blockList[i] === deleteSite) {
-                blockList.splice(i ,1);
+                
+                blockList.splice(i, 1);
+                chrome.storage.sync.set({ blockList });
+
+                // Remove website div from block list
+                this.remove();
             }
         }
-        chrome.storage.sync.set({ blockList });
-
-        // Update the page's html
-        removeNodes(listDiv);
-        showList();
     });
-}
-
-
-// Remove all child nodes from an element
-function removeNodes(element) {
-    while (element.firstChild) {
-        element.removeChild(element.firstChild);
-    }
 }
 
 
@@ -158,6 +168,9 @@ zoneButton.addEventListener("click", () => {
 
     // inZone updates
     chrome.storage.sync.get("inZone", async ({ inZone }) => {
+
+        // Quit in case of double starting
+        if (inZone.started) return;
         
         // Turn zone on
         inZone.isOn = true;
@@ -301,17 +314,14 @@ form1.addEventListener("submit", function () {
     let value = document.getElementById("input1").value.replace(/[^a-z0-9áéíóúñü \.,_-]/gim,"").trim();
 
     // Make sure field is not empty
-    if (value === "") {
+    if (!value) {
         return;
     }
 
-    // Remove old nodes from listDiv
-    removeNodes(listDiv);
-    
     chrome.storage.sync.get("blockList", ({ blockList }) => {
         
         // Update list
-        blockList.push(value);
+        blockList.push(value.toLowerCase());
         chrome.storage.sync.set({ blockList });
 
         // Update div to show block list
@@ -387,14 +397,14 @@ async function loadUserInfo() {
      // Load image
      const img = document.getElementById("profile_pic");
      img.src = userInfo.img;
-     img.style.display = "inline";
 
      // Display info
-     const profile_div = document.getElementById("profile_div");
-     profile_div.style.display = "inline";
-     profile_div.innerHTML = "<p style='display:inline'>" + userInfo.name + "</p>";
+     const profile_name = document.getElementById("profile_name");
+     profile_name.innerHTML = userInfo.name;
+     profile_name.classList.remove("d-none");
+     profile_name.classList.add("d-inline");
 
-     // Change button
+     // Change button behavior
      const loginButton = document.getElementById("login_button");
      loginButton.innerHTML = "Logout";
      loginButton.onclick = revokeAccess;
