@@ -1,14 +1,8 @@
-// Import login/authentication related functions
-import { tokenRequired, initCache } from "./oauth.js";
-
-// Append link to zone page when zone time is on
-const zone_page_link = document.getElementById("zone_page_link");
+// Enable link to zone page when zone time is started
+const timer_img = document.getElementById("timer_img");
 chrome.storage.sync.get("inZone", ({ inZone }) => {
     if(inZone.started) {
-        const zp_link = document.createElement("a");
-        zp_link.href = "zone_page.html";
-        zp_link.innerHTML = "ZONE TIMER";
-        zone_page_link.appendChild(zp_link);
+        timer_img.parentElement.classList.remove("disabled");
     }
 });
 
@@ -26,46 +20,15 @@ function showList() {
 
         // Create and append nodes with blocked sites
         for (let i = 0; i < len; i++) {
-            
-            // Create a div with website name and delete button
-            const div = document.createElement("div");
-            div.id = "div" + i;
-            div.className = "row border-2 border-end border-bottom rounded p-2 m-3 " +
-                            "collapse collapse-horizontal show shadow-lg site-collapse";
-            div.title = blockList[i];
-            list_collapse.appendChild(div);
 
-            // Create inner div with website name in a span
-            const span_div = document.createElement("div");
-            span_div.className = "col-6";
-            div.appendChild(span_div);
-
-            const span = document.createElement("span");
-            span.className = "align-middle";
-            span.innerHTML = blockList[i].length > 18 ? blockList[i].slice(0, 18) + "..." : blockList[i];
-            span_div.appendChild(span);
-
-            // Create inner div with delete button
-            const button_div = document.createElement("div");
-            button_div.className = "col-6";
-            div.appendChild(button_div);
-
-            const delButton = document.createElement("button");
-            delButton.innerHTML = "Delete";
-            delButton.id = "button" + i;
-            delButton.title = "Remove from block list"
-            delButton.className = "btn btn-danger float-end";
-            delButton.setAttribute("data-bs-toggle", "collapse");
-            delButton.setAttribute("data-bs-target", "#div" + i);
-            delButton.setAttribute("aria-controls", "div" + i);
-            button_div.appendChild(delButton);
+            appendSite(blockList[i], i);
         }
 
-        // Add click events to remove websites' collapses and delete buttons
-        for (let i = 0; i < len; i++) {
-            document.getElementById("div" + i).addEventListener("hidden.bs.collapse", deleteCollapse);
-            document.getElementById("button" + i).addEventListener("click", hideButton);
-        }
+        // // Add click events to remove websites' collapses and delete buttons
+        // for (let i = 0; i < len; i++) {
+        //     document.getElementById("div" + i).addEventListener("hidden.bs.collapse", deleteCollapse);
+        //     document.getElementById("button" + i).addEventListener("click", hideButton);
+        // }
                 
     });
 }
@@ -144,7 +107,6 @@ function deleteCollapse() {
     // Search and remove a specific website from the list
     const deleteSite = this.title.toLowerCase();
 
-    console.log(deleteSite);
     chrome.storage.sync.get("blockList", ({ blockList }) => {
 
         // Remove website from storage api
@@ -308,10 +270,14 @@ function createAlarm(type, values) {
 
 // Add sites to block list when button is clicked
 let form1 = document.getElementById("form1");
-form1.addEventListener("submit", function () {
+form1.addEventListener("submit", function (event) {
+
+    // Prevent page reloading
+    event.preventDefault();
 
     // Filter characters from user input
-    let value = document.getElementById("input1").value.replace(/[^a-z0-9áéíóúñü \.,_-]/gim,"").trim();
+    const input1 = document.getElementById("input1");
+    let value = input1.value.replace(/[^a-z0-9áéíóúñü \.,_-]/gim,"").trim().toLowerCase();
 
     // Make sure field is not empty
     if (!value) {
@@ -319,15 +285,69 @@ form1.addEventListener("submit", function () {
     }
 
     chrome.storage.sync.get("blockList", ({ blockList }) => {
+
+        // Check if value already in the list
+        for (let i = 0, len = blockList.length; i < len; i++) {
+            if (blockList[i] === value) {
+                alert(blockList[i] + " already in the block list!");
+                input1.value = "";
+                return;
+            }
+        }
         
         // Update list
-        blockList.push(value.toLowerCase());
+        blockList.push(value);
         chrome.storage.sync.set({ blockList });
 
         // Update div to show block list
-        showList();
+        const list = document.querySelectorAll(".site-collapse");
+        let index = list.length > 0 ? parseInt(list[list.length - 1].id.split("v")[1]) + 1: 0;
+        appendSite(value, index);
+
+        input1.value = "";
     });
 });
+
+
+// Append new website node to block list
+function appendSite(site, i) {
+
+    // Create a div with website name and delete button
+    const div = document.createElement("div");
+    div.id = "div" + i;
+    div.className = "row border-2 border-end border-bottom rounded p-2 m-3 " +
+                    "collapse collapse-horizontal show shadow-lg site-collapse";
+    div.title = site;
+    div.addEventListener("hidden.bs.collapse", deleteCollapse);
+    list_collapse.appendChild(div);
+
+    // Create inner div with website name in a span
+    const span_div = document.createElement("div");
+    span_div.className = "col-6";
+    div.appendChild(span_div);
+
+    const span = document.createElement("span");
+    const maxChar = 15;
+    span.className = "align-middle";
+    span.innerHTML = site.length > maxChar ? site.slice(0, maxChar) + "..." : site;
+    span_div.appendChild(span);
+
+    // Create inner div with delete button
+    const button_div = document.createElement("div");
+    button_div.className = "col-6";
+    div.appendChild(button_div);
+
+    const delButton = document.createElement("button");
+    delButton.innerHTML = "Delete";
+    delButton.id = "button" + i;
+    delButton.title = "Remove from block list"
+    delButton.className = "btn btn-danger float-end";
+    delButton.setAttribute("data-bs-toggle", "collapse");
+    delButton.setAttribute("data-bs-target", "#div" + i);
+    delButton.setAttribute("aria-controls", "div" + i);
+    delButton.addEventListener("click", hideButton);
+    button_div.appendChild(delButton);
+}
 
 
 // Add last session name to session name field
@@ -340,76 +360,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
-
-// --- LOGIN RELATED CODE ---
-
-
-// Get an authorization token from the user then load information
-async function login() {
-
-    // True parameter means authorization token request in interactive mode (initCache from oauth.js)
-    await initCache(true);
-    loadUserInfo();
-}
-
-
-// Log user out (Function decorated by tokenRequired from oauth.js)
-function revokeAccess(token) {
-    
-    // Revoke token from google database
-    fetch('https://accounts.google.com/o/oauth2/revoke?token=' + token);
-
-    // Remove token from cache
-    chrome.identity.removeCachedAuthToken({token: token}, () => {
-        alert("You have been removed");
-    });
-
-    // Remove user info from cache
-    chrome.storage.session.clear();
-
-    // Refresh page
-    location.reload();
-}
-revokeAccess = tokenRequired(revokeAccess);
- 
-
-// Load user related info
-async function loadUserInfo() {
-    
-    // Populate user info from cache
-    const userInfo = await chrome.storage.session.get();
-
-    // Load content for user not logged into the extension
-    if(!userInfo.logged) {
-        const loginButton = document.getElementById("login_button");
-        let userinfo = await chrome.identity.getProfileUserInfo({accountStatus: "ANY"});
-        loginButton.innerHTML = "Login";
-        loginButton.onclick = login;
-
-        // Show option to log using the same email logged into the chrome browser
-        if(userinfo.email) {
-            loginButton.innerHTML += " with " + userinfo.email;
-            loginButton.title = "Login using the account logged in chrome"
-        }
-        return;
-    }
-
-     // Load image
-     const img = document.getElementById("profile_pic");
-     img.src = userInfo.img;
-
-     // Display info
-     const profile_name = document.getElementById("profile_name");
-     profile_name.innerHTML = userInfo.name;
-     profile_name.classList.remove("d-none");
-     profile_name.classList.add("d-inline");
-
-     // Change button behavior
-     const loginButton = document.getElementById("login_button");
-     loginButton.innerHTML = "Logout";
-     loginButton.onclick = revokeAccess;
-}
-
-
-// Load user info when the page finishes loading
-document.addEventListener("DOMContentLoaded", loadUserInfo);

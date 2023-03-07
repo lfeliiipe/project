@@ -8,8 +8,35 @@
     </head>
     <body>
         <div class="box-blur m-2 p-3">
+            <div id="profile"></div>
+
+            <nav class="navbar navbar-expand navbar-dark nav-main">
+                <div class="container-fluid justify-content-center">
+                    <ul class="navbar-nav border-bottom">
+                        <li class="nav-item">
+                            <a class="nav-link" href="popup.html" title="Home Page">
+                                Home
+                                <img src="./bootstrap/icons/home.png">
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="zone_page.html" title="Timer">
+                                Timer
+                                <img src="./bootstrap/icons/timer.png">
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="options.html" title="Options Page">
+                                Options
+                                <img src="./bootstrap/icons/settings.png">
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
             <div class="box-orange mt-3 mb-3">
-                <p>Options</p>
+                <p>OPTIONS</p>
                 <div class="d-grid gap-3 p-3">
                     <button class="btn btn-primary" id="reset_list">Reset Block List</button>
                     <button class="btn btn-primary" id="reset_file">Reset File Settings</button>
@@ -17,6 +44,8 @@
                 </div>
             </div>
         </div>
+
+        <script src="common.js" type="module"></script>
         <script src="options.js" type="module"></script>
     </body>
 </html>

@@ -8,18 +8,32 @@
     <body>
         <div class="box-blur m-2 p-3">
             
-            <div class="mb-2">
-                <img type="button" data-bs-toggle="collapse" class="float_start rounded-circle" id="profile_pic"
-                     alt="Profile Picture" src="./imgs/default_picture.png" data-bs-target="#options" aria-controls="options"
-                     aria-expanded="true" title="Options">
-                <kbd class="ms-1 d-none" id="profile_name"></kbd>
-                <div class="collapse m-1" id="options">
-                    <div class="btn-group-vertical">
-                        <a type="button" class="btn btn-light" href="./options.html">Options</a>
-                        <button type="button" class="btn btn-light" id="login_button">Log</button>
-                    </div>
+            <div id="profile" class="mb-2"></div>
+
+            <nav id="navbar" class="navbar navbar-expand navbar-dark nav-main">
+                <div class="container-fluid justify-content-center">
+                    <ul class="navbar-nav border-bottom">
+                        <li class="nav-item">
+                            <a class="nav-link" href="popup.html" title="Home Page">
+                                Home
+                                <img src="./bootstrap/icons/home.png">
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="zone_page.html" title="Timer">
+                                Timer
+                                <img src="./bootstrap/icons/timer.png">
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="options.html" title="Options Page">
+                                Options
+                                <img src="./bootstrap/icons/settings.png">
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-            </div>
+            </nav>
 
             <div class="box-orange mt-3 mb-3" id="list_div">
                 <p data-bs-toggle="collapse" href="#list_collapse" role="button" aria-expanded="true" aria-controls="list_collapse">
@@ -91,11 +105,11 @@
                         </div>
 
                         <button class="btn btn-primary col-6 mx-auto" id="zoneButton" type="submit" display="none">GET IN THE ZONE</button>
-                        <div id="zone_page_link"></div>
                     </form>
                 </div>
             </div>
         </div>
+        <script type="module" src="common.js"></script>
         <script type="module" src="popup.js"></script>
     </body>
 </html>

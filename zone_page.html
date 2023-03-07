@@ -7,15 +7,43 @@
     </head>
     <body>
         <div class="box-blur m-2 p-3">
+            <div id="profile"></div>
+
+            <nav class="navbar navbar-expand navbar-dark nav-main">
+                <div class="container-fluid justify-content-center">
+                    <ul class="navbar-nav border-bottom">
+                        <li class="nav-item">
+                            <a class="nav-link" href="popup.html" title="Home Page">
+                                Home
+                                <img src="./bootstrap/icons/home.png">
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="zone_page.html" title="Timer">
+                                Timer
+                                <img src="./bootstrap/icons/timer.png">
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="options.html" title="Options Page">
+                                Options
+                                <img src="./bootstrap/icons/settings.png">
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>  
+
             <div class="box-orange mt-3 mb-3">
                 <p id="zone_status"></p>
                 <div id="div_periods"></div>
                 <div id="div_time">--:--:--</div>
             </div>
             <div class="card mt-3 mb-3" id="session_info"></div>
-            <button class="btn btn-primary" id="zoneOff">TURN OFF ZONE MODE</button>
-            <a href="popup.html">HOME PAGE</a>
+            <button class="btn btn-primary d-grid mx-auto" id="zoneOff">TURN OFF ZONE MODE</button>
         </div>
+
+        <script src="common.js" type="module"></script>
         <script src="zone_page.js" type="module"></script>
     </body>
 </html>
