@@ -1,12 +1,8 @@
 /* Tags */
 body {
   width: 350px;
-  height: auto;
+  min-height: auto;
   background-color:  #000000c9;
-}
-
-button:disabled {
-  cursor: not-allowed;
 }
 
 kbd {
@@ -14,44 +10,6 @@ kbd {
   color: black;
   font-size: large;
 }
-
-/* test */
-#menu_img {
-  filter: invert(100%);
-}
-
-.icon-18-black {
-  height: 18px;
-  width: 18px;
-}
-
-.nav-main img {
-  filter: invert(100%);
-  height: 18px;
-  width: 18px;
-}
-
-.nav-main .nav-link {
-  transition: none;
-}
-
-.nav-main .disabled img {
-  opacity: 0.65;
-}
-
-.nav-main a:hover {
-  opacity: 0.65;
-}
-
-.nav-main .active {
-  background-color: orange;
-}
-
-.test {
-/* inverso de cinza #4b4b4b */
-  background-color: grey;
-}
-/* test */
 
 input[type="text"] {
   text-align: center;
@@ -80,11 +38,39 @@ span p {
 .box-blur {
   background-color:  rgba(0,0,0,.2);
   border-radius: 0.8rem;
+  min-height: 415px;
 }
 
 .box-orange {
   background-color: orange;
   border-radius: 0.8rem;
+}
+
+.icon-18-black {
+  height: 18px;
+  width: 18px;
+}
+
+.nav-main img {
+  filter: invert(100%);
+  height: 18px;
+  width: 18px;
+}
+
+.nav-main .nav-link {
+  transition: none;
+}
+
+.nav-main .disabled img {
+  opacity: 0.65;
+}
+
+.nav-main a:hover {
+  opacity: 0.65;
+}
+
+.nav-main .active {
+  background-color: orange;
 }
 
 .row.collapse-horizontal {

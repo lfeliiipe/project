@@ -1,6 +1,5 @@
-// Import login/authentication and API related functions
-import { uploadSession, notify, resetStorageObjs } from "./helpers.js";
-import { initCache } from "./oauth.js";
+// Import authentication and API related functions
+import { uploadSession, notify, resetStorageObjs, initCache } from "./helpers.js";
 
 // Initialize user info cache and necessary objects using storage API
 chrome.runtime.onInstalled.addListener(() => {
@@ -81,10 +80,19 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     chrome.storage.sync.set({ inZone });
     
     // Alarm for DEFINED time setting
+    const userInfo = await chrome.storage.session.get();
+    console.log("userinfo: ", userInfo);
     if(alarm.name === "defined") {
-        endZoneTime(true);
+        await endZoneTime(true);
         notify("Session is over!");
-        await uploadSession();
+        if (userInfo?.authorized) {
+            console.log("defined foi pro upload session");
+            await uploadSession();
+        }
+        else if (!userInfo?.authorized) {
+            console.log("defined foi pro reset inZone");
+            await resetStorageObjs("inZone");
+        }
     }
 
     // Alarms for POMODORO time setting
@@ -98,33 +106,28 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
         // Update inZone and notify user
         switch(pomoIndex) {
             case "zone":
-                endZoneTime();
+                await endZoneTime();
                 notify("Zone time is over!\nTake a break!");
                 break;
             
             case "break":
-                endBreakTime();
+                await endBreakTime();
                 notify("Break time is over!\nGet in the zone!");
                 break;
 
             case "last":
-                endBreakTime(true);
+                await endBreakTime(true);
                 notify("Pomodoro session is over!");
-                await uploadSession();
+                if (userInfo?.authorized) {
+                    console.log("pomodoro foi pro upload session");
+                    await uploadSession();
+                }
+                else if (!userInfo?.authorized) {
+                    console.log("pomodoro foi pro reset inZone");
+                    await resetStorageObjs("inZone");
+                }
                 break;
         }
-    }
-});
-
-
-// Listen for storage changes and set new popup page
-chrome.storage.sync.onChanged.addListener((changes) => {
-    
-    // When a session is started zone_page becomes the popup
-    if (changes?.inZone?.newValue?.started) {
-        chrome.action.setPopup({popup: "zone_page.html"});
-    } else {
-        chrome.action.setPopup({popup: "popup.html"});
     }
 });
 
@@ -146,36 +149,40 @@ chrome.notifications.onButtonClicked.addListener(async () => {
 
 
 // Update inZone object when zone time is over
-function endZoneTime(completed=false) {
-    chrome.storage.sync.get("inZone", ({ inZone }) => {
+async function endZoneTime(completed=false) {
+    const { inZone } = await chrome.storage.sync.get("inZone");
 
-        // Completed true means DEFINED time setting (session is over), in this case pomoStatus doesn't change 
-        if(completed) {
-            inZone.isCompleted = true;
-        } else {
-            inZone.pomoStatus.push("break");
-        }
+    console.log("inzone endzonetime: ", inZone);
 
-        inZone.isOn = false;
-        chrome.storage.sync.set({ inZone });
-    });
+    // Completed true means DEFINED time setting (session is over), in this case pomoStatus doesn't change 
+    if(completed) {
+        inZone.isCompleted = true;
+    } else {
+        inZone.pomoStatus.push("break");
+    }
+
+    inZone.isOn = false;
+    await chrome.storage.sync.set({ inZone });
+
 }
 
 
 // Update inZone object when break time is over
-function endBreakTime(completed=false) {
-    chrome.storage.sync.get("inZone", ({ inZone }) => {
-        
-        // Completed true means pomodoro session is over
-        if(completed) {
-            inZone.isCompleted = true;
-            inZone.isOn = false;
-            inZone.pomoStatus.push("end");
-        } else {
-            inZone.pomoStatus.push("zone");
-            inZone.isOn = true;
-        }
+async function endBreakTime(completed=false) {
+    const { inZone } = await chrome.storage.sync.get("inZone");
 
-        chrome.storage.sync.set({ inZone });
-    });
+    console.log("inzone endbreaktime: ", inZone);
+
+    // Completed true means pomodoro session is over
+    if(completed) {
+        inZone.isCompleted = true;
+        inZone.isOn = false;
+        inZone.pomoStatus.push("end");
+    } else {
+        inZone.pomoStatus.push("zone");
+        inZone.isOn = true;
+    }
+
+    await chrome.storage.sync.set({ inZone });
+
 }

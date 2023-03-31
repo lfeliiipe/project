@@ -1,9 +1,7 @@
-// Import authentication related function
-import { tokenRequired } from "./oauth.js";
-
 // Resets/Creates necessary objects 
 async function resetStorageObjs(objName) {
 
+    console.log("entrou pra resetar: ", objName);
     switch(objName) {
         case "inZone":
             const inZone = {
@@ -22,6 +20,7 @@ async function resetStorageObjs(objName) {
                 pomoDates: []
             };
             await chrome.storage.sync.set({ inZone });
+            console.log("inZone depois do reset: ", inZone);
             break;
 
         case "blockList":
@@ -149,7 +148,7 @@ async function fetchCalls(type, token) {
                     "updateCells": {
                         "range": {
                             "endRowIndex": 4,
-                            "endColumnIndex": 6
+                            "endColumnIndex": 7
                         },
                         "rows": [
 
@@ -163,7 +162,8 @@ async function fetchCalls(type, token) {
                             // Second row
                             {
                                 "values": [
-                                    {"userEnteredValue": {"stringValue": "Date"}},
+                                    {"userEnteredValue": {"stringValue": "Date and Time"}},
+                                    {},
                                     {"userEnteredValue": {"stringValue": "Sessions"}},
                                     {},
                                     {"userEnteredValue": {"stringValue": "Subject"}},
@@ -175,7 +175,8 @@ async function fetchCalls(type, token) {
                             // Third row
                             {
                                 "values": [
-                                    {},
+                                    {"userEnteredValue": {"stringValue": "Start"}},
+                                    {"userEnteredValue": {"stringValue": "End"}},
                                     {"userEnteredValue": {"stringValue": "Type"}},
                                     {"userEnteredValue": {"stringValue": "Cicles"}}
                                 ]
@@ -184,12 +185,13 @@ async function fetchCalls(type, token) {
                             // Fourth row
                             {
                                 "values": [
-                                    {"userEnteredValue": {"stringValue": "TOTAL"}},
+                                    {"userEnteredValue": {"stringValue": "TOTAL >>>"}},
                                     {},
-                                    {"userEnteredValue": {"formulaValue": "=SOMA(C5:C)"}},
-                                    {},
-                                    {"userEnteredValue": {"formulaValue": "=SOMA(E5:E)"}},
+                                    {"userEnteredValue": {"stringValue": "-"}},
+                                    {"userEnteredValue": {"formulaValue": "=SOMA(D5:D)"}},
+                                    {"userEnteredValue": {"stringValue": "-"}},
                                     {"userEnteredValue": {"formulaValue": "=SOMA(F5:F)"}},
+                                    {"userEnteredValue": {"formulaValue": "=SOMA(G5:G)"}},
                                     
                                 ]
                             }
@@ -199,45 +201,64 @@ async function fetchCalls(type, token) {
                 },
 
                 // Multiple merge requests
+                // Merge 7 columns on first row
                 {
                     "mergeCells": {
                         "range": {
-                            "endColumnIndex": 6,
+                            "endColumnIndex": 7,
                             "endRowIndex": 1
                         },
                         "mergeType": "MERGE_ROWS"
                     }
                 },
+
+                // Merge columns A and B on second row
                 {
                     "mergeCells": {
                         "range": {
                             "startRowIndex": 1,
                             "endRowIndex": 2,
-                            "startColumnIndex": 1,
-                            "endColumnIndex": 3
+                            "endColumnIndex": 2
                         },
                         "mergeType": "MERGE_ROWS"
                     }
                 },
+                
+                // Merge columns C and D on second row
+                {
+                    "mergeCells": {
+                        "range": {
+                            "startRowIndex": 1,
+                            "endRowIndex": 2,
+                            "startColumnIndex": 2,
+                            "endColumnIndex": 4
+                        },
+                        "mergeType": "MERGE_ROWS"
+                    }
+                },
+
+                // Merge rows 2 and 3 on columns E, F, G
                 {
                     "mergeCells": {
                         "range": {
                             "startRowIndex": 1,
                             "endRowIndex": 3,
-                            "endColumnIndex": 1
+                            "startColumnIndex": 4,
+                            "endColumnIndex": 7
                         },
                         "mergeType": "MERGE_COLUMNS"
                     }
                 },
+
+                // Merge columns A and B on row 4
                 {
                     "mergeCells": {
                         "range": {
-                            "startRowIndex": 1,
-                            "endRowIndex": 3,
-                            "startColumnIndex": 3,
-                            "endColumnIndex": 6
+                            "startRowIndex": 3,
+                            "endRowIndex": 4,
+                            "endColumnIndex": 2
                         },
-                        "mergeType": "MERGE_COLUMNS"
+                        "mergeType": "MERGE_ROWS"
                     }
                 },
 
@@ -369,18 +390,21 @@ async function fetchCalls(type, token) {
                             {
                                 "values": [
                                 
-                                    // First column (Date)
+                                    // First column (Start Date)
                                     {"userEnteredValue": {"stringValue": start.toLocaleString()}},
 
-                                    // Second column (Session Type)
+                                    // Second column (End Date)
+                                    {"userEnteredValue": {"stringValue": end.toLocaleString()}},
+
+                                    // Third column (Session Type)
                                     {"userEnteredValue": {"stringValue": inZone.timeSetting.toUpperCase()}},
 
-                                    // Third column (Session Quantity)
+                                    // Fourth column (Session Quantity)
                                     {"userEnteredValue": {
                                         "numberValue": (inZone.timeSetting === "pomodoro") ? inZone.pomoSettings.cicles : 1}
                                     },
 
-                                    // Fourth column (Subject)
+                                    // Sixth column (Subject)
                                     {"userEnteredValue": {"stringValue": inZone.sessionName}},
 
                                     // Fifth column (Duration)
@@ -396,7 +420,7 @@ async function fetchCalls(type, token) {
                                         }
                                     },
 
-                                    // Sixth column (Duration (No Break))
+                                    // Seventh column (Duration (No Break))
                                     {
                                         "userEnteredValue": {
                                             "formulaValue": "=TIME(" + nb[0] + ";" + nb[1] + ";" + nb[2] + ")"
@@ -415,6 +439,7 @@ async function fetchCalls(type, token) {
                     }
                 }
             ]});
+            console.log("init.body: ", init.body);
             break;
     }
 
@@ -490,10 +515,9 @@ async function uploadSession(token) {
     // Retrieve file information
     const  { fileSettings } = await chrome.storage.sync.get("fileSettings");
 
-    let hasFolder = fileSettings.folderId, hasFile = fileSettings.fileId;
-    let lineCreated = false, headersCreated = false, newFileNeeded = false;
-
     // Force a creation of new file for a different month or year
+    let hasFolder = fileSettings?.folderId, hasFile = fileSettings?.fileId;
+    let lineCreated = false, headersCreated = false, newFileNeeded = false;
     if(fileSettings.lastFileCreatedDate) {
         let now = new Date();
         let lastDate = new Date(fileSettings.lastFileCreatedDate);
@@ -543,5 +567,57 @@ async function uploadSession(token) {
 uploadSession = tokenRequired(uploadSession);
 
 
+// -- Authentication related functions --
+// Function decorator to require authorization token
+function tokenRequired(fn) {
+    return async function(...args) {
+        try {
+            
+            // Pass a parameter true to the decorated function to set interactive to true
+            let itc = (args[0] === true) ? true : false;
+            let tokenResult = await chrome.identity.getAuthToken({interactive: itc});
+            return fn(tokenResult.token);
+        } 
+        
+        // If the user isn't logged a token is not returned
+        catch(err) {
+            console.log("tokenRequired Exception: ", err);
+        }
+    }
+}
+
+
+// Cache user info in storage.session (Decorated by tokenRequired)
+async function initCache(token) {
+
+     // Get user info from google (name, picture)
+     let init = {
+        method: 'GET',
+        async: true,
+        headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json'
+        },
+        'contentType': 'json'
+    };
+    await fetch('https://www.googleapis.com/oauth2/v3/userinfo?access_token' + token, init)
+    .then((response) => response.json())
+    .then((data) => {
+
+        // Quit if response data doesn't have this property
+        if(!data.email_verified === true) return;
+
+        // Populate cache
+        const cacheUser = { authorized: true };
+        cacheUser.name = data.name;
+        cacheUser.img = data.picture;
+        chrome.storage.session.set(cacheUser);
+    })
+}
+initCache = tokenRequired(initCache);
+
+
 // Export functions to extension's pages
-export { getDurationVariables, durationToString, fetchCalls, uploadSession, notify, resetStorageObjs };
+export {
+    getDurationVariables, durationToString, fetchCalls, uploadSession, notify, resetStorageObjs, initCache, tokenRequired
+};

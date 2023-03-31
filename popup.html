@@ -10,106 +10,160 @@
             
             <div id="profile" class="mb-2"></div>
 
-            <nav id="navbar" class="navbar navbar-expand navbar-dark nav-main">
-                <div class="container-fluid justify-content-center">
-                    <ul class="navbar-nav border-bottom">
-                        <li class="nav-item">
-                            <a class="nav-link" href="popup.html" title="Home Page">
-                                Home
-                                <img src="./bootstrap/icons/home.png">
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="zone_page.html" title="Timer">
-                                Timer
-                                <img src="./bootstrap/icons/timer.png">
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="options.html" title="Options Page">
-                                Options
-                                <img src="./bootstrap/icons/settings.png">
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+            <div id="carousel_main" class="carousel slide">
+                <nav id="navbar" class="navbar navbar-expand navbar-dark nav-main">
+                    <div class="container-fluid justify-content-center">
+                        <ul class="navbar-nav border-bottom">
+                            <li class="nav-item">
+                                <a class="nav-link" title="Home Page" type="button" data-bs-target="#carousel_main" data-bs-slide-to="0" class="active">
+                                    Home
+                                    <img src="./bootstrap/icons/home.png">
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link disabled" title="Timer" type="button" data-bs-target="#carousel_main" data-bs-slide-to="1"
+                                 id="nav_timer">
+                                    Timer
+                                    <img src="./bootstrap/icons/timer.png">
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" title="Options Page" type="button" data-bs-target="#carousel_main" data-bs-slide-to="2">
+                                    Options
+                                    <img src="./bootstrap/icons/settings.png">
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
 
-            <div class="box-orange mt-3 mb-3" id="list_div">
-                <p data-bs-toggle="collapse" href="#list_collapse" role="button" aria-expanded="true" aria-controls="list_collapse">
-                    BLOCK LIST
-                </p>
-                <div class="collapse show pb-2" id="list_collapse">
-                    <form class="p-2" id="form1">
-                        <div class="row g-2 align-items-center">
-                            <div class="col-9 form-floating mt-3 mb-3">
-                                <input class="form-control" id="input1" type="text" placeholder="Add sites to your block list">
-                                <label for="input1">Add sites to your block list</label>
-                            </div>
-                            <div class="d-grid col-3 mx-auto">
-                                <button class="btn btn-primary" id="bf1" type="submit">Add</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            
-            <div class="box-orange mt-3 mb-3" id="time_settings">
-                <p data-bs-toggle="collapse" href="#time_collapse" role="button" aria-expanded="true" aria-controls="time_collapse">
-                    TIME SETTINGS
-                </p>
-                <div class="collapse show pb-2" id="time_collapse">
-                    <form class="p-2" id="form2">
-                        <div class="form-check" id="und_div">
-                            <input class="form-check-input" type="radio" id="und_radio" name="set_time" value="undefined">
-                            <label class="form-check-label" for="undefined">Undefined</label>
-                        </div>
-                        <div class="form-check" id="pomo_div">
-                            <input class="form-check-input" type="radio" id="pomo_radio" name="set_time" value="pomodoro">
-                            <label class="form-check-label" for="pomodoro">Pomodoro Sessions</label>
-                        </div>
-                        <div class="form-check" id="def_div">
-                            <input class="form-check-input" type="radio" id="def_radio" name="set_time" value="defined">
-                            <label class="form-check-label" for="defined">Defined</label>
-                        </div>
-
-                        <div id="div_pomodoro">
-                            <div class="input-group w-50 mx-auto m-2">
-                                <div class="input-group-text">Sessions</div>
-                                <input class="form-control" type="number" id="sessions" min="1" max="10" value="1">
-                            </div>
-                            <div class="input-group w-75 mx-auto m-2">
-                                <div class="input-group-text">Zone Minutes</div>
-                                <input class="form-control" type="number" min="0" max="59" id="zone_minutes" value="25">
-                            </div>
-                            <div class="input-group w-75 mx-auto m-2">
-                                <div class="input-group-text">Break Minutes</div>
-                                <input class="form-control" type="number" min="0" max="59" id="break_minutes" value="5">
+                <div class="carousel-inner">
+                    <!-- Home -->
+                    <div class="carousel-item active">
+                        <div class="box-orange mt-3 mb-3" id="list_div">
+                            <p data-bs-toggle="collapse" href="#list_collapse" role="button" aria-expanded="false" aria-controls="list_collapse"
+                             title="Add and remove websites from your block list">
+                                BLOCK LIST
+                            </p>
+                            <div class="collapse pb-2" id="list_collapse">
+                                <form class="p-2" id="form1">
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-9 form-floating mt-3 mb-3">
+                                            <input class="form-control" id="input1" type="text" placeholder="Add sites to your block list">
+                                            <label for="input1">Add sites to your block list</label>
+                                        </div>
+                                        <div class="d-grid col-3 mx-auto">
+                                            <button class="btn btn-primary" id="bf1" type="submit">Add</button>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
-
-                        <div id="div_defined">
-                            <div class="input-group w-50 mx-auto m-2">
-                                <div class="input-group-text">Hours</div>
-                                <input class="form-control" type="number" min="0" max="23" id="hours" value="0">
-                            </div>
-                            <div class="input-group w-50 mx-auto m-2">
-                                <div class="input-group-text">Minutes</div>
-                                <input class="form-control" type="number" min="0" max="59" id="minutes" value="30">
-                            </div>
-                        </div>     
                         
-                        <div class="form-floating mt-3 mb-3">
-                            <input id="session_label" type="text" value="" placeholder="Session 1" class="form-control"> 
-                            <label for="session_label">Label your session</label>
-                        </div>
+                        <div class="box-orange mt-3 mb-3" id="time_settings">
+                            <p data-bs-toggle="collapse" href="#time_collapse" role="button" aria-expanded="true" aria-controls="time_collapse">
+                                TIME SETTINGS
+                            </p>
+                            <div class="collapse show pb-2" id="time_collapse">
+                                <form class="p-2" id="form2">
+                                    <div class="form-check" id="und_div">
+                                        <input class="form-check-input" type="radio" id="und_radio" name="set_time" value="undefined">
+                                        <label class="form-check-label" for="undefined">Undefined</label>
+                                    </div>
+                                    <div class="form-check" id="pomo_div">
+                                        <input class="form-check-input" type="radio" id="pomo_radio" name="set_time" value="pomodoro">
+                                        <label class="form-check-label" for="pomodoro">Pomodoro Sessions</label>
+                                    </div>
+                                    <div class="form-check" id="def_div">
+                                        <input class="form-check-input" type="radio" id="def_radio" name="set_time" value="defined">
+                                        <label class="form-check-label" for="defined">Defined</label>
+                                    </div>
 
-                        <button class="btn btn-primary col-6 mx-auto" id="zoneButton" type="submit" display="none">GET IN THE ZONE</button>
-                    </form>
+                                    <div id="div_pomodoro">
+                                        <div class="row m-2">
+                                            <div class="col-6">
+                                                <span class="card p-1 float-end">Sessions</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <input class="form-control" type="number" id="sessions" min="1" max="10" value="1">
+                                            </div>        
+                                        </div>
+                                        <div class="row m-2">
+                                            <div class="col-6">
+                                                <span class="card p-1 float-end">Zone Minutes</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <input class="form-control" type="number" min="1" max="59" id="zone_minutes" value="25">
+                                            </div>
+                                        </div>
+                                        <div class="row m-2">
+                                            <div class="col-6">
+                                                <span class="card p-1 float-end">Break Minutes</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <input class="form-control" type="number" min="1" max="59" id="break_minutes" value="5">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="div_defined">
+                                        <div class="row m-2">
+                                            <div class="col-6">
+                                                <span class="card p-1 float-end">Hours</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <input class="form-control" type="number" min="0" max="23" id="hours" value="0">
+                                            </div>
+                                        </div>
+                                        <div class="row m-2">
+                                            <div class="col-6">
+                                                <span class="card p-1 float-end">Minutes</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <input class="form-control" type="number" min="0" max="59" id="minutes" value="30">
+                                            </div>
+                                        </div>                                        
+                                    </div>     
+                                    
+                                    <div class="form-floating mt-3 mb-3">
+                                        <input id="session_label" type="text" value="" placeholder="Session 1" class="form-control"> 
+                                        <label for="session_label">Label your session</label>
+                                    </div>
+
+                                    <button class="btn btn-primary col-6 mx-auto" id="zoneButton" type="submit" display="none">GET IN THE ZONE</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zone page -->
+                    <div class="carousel-item">
+                        <div class="box-orange mt-3 mb-3 ms-2">
+                            <p id="zone_status"></p>
+                            <div id="div_periods" class="text-center"></div>
+                            <div id="div_time">--:--:--</div>
+                        </div>
+                        <div class="card mt-3 mb-3 ms-2" id="session_info"></div>
+                        <button class="btn btn-primary d-grid mx-auto" id="zoneOff">TURN OFF ZONE MODE</button>
+                    </div>
+
+                    <!-- Options page -->
+                    <div class="carousel-item">
+                        <div class="box-orange mt-3 mb-3 ms-2">
+                            <p>OPTIONS</p>
+                            <div class="d-grid gap-3 p-3">
+                                <button class="btn btn-primary" id="reset_list">Reset Block List</button>
+                                <button class="btn btn-primary" id="reset_file">Reset File Settings</button>
+                                <button class="btn btn-primary" id="reset_inzone">Reset Session Settings</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <script type="module" src="common.js"></script>
         <script type="module" src="popup.js"></script>
+        <script type="module" src="home.js"></script>
+        <script type="module" src="timer.js"></script>
+        <script type="module" src="options.js"></script>
     </body>
 </html>
