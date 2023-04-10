@@ -295,7 +295,7 @@ zoneButton.addEventListener("click", async (event) => {
     
     // Filter user input to save session name
     let sessionName = document.getElementById("session_label").value;
-    const escape = /([^a-z0-9\.\/:,#_-]|^[\/\'\":#;.\*])/igm;
+    const escape = /([^a-z0-9\.\/:,#_-\s]|^[\/\'\":#;.\*])/igm;
     sessionName = sessionName.replace(escape, "").trim();
     inZone.sessionName = sessionName;
 

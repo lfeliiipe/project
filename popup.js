@@ -1,5 +1,5 @@
 // Import authentication related functions
-import { tokenRequired, initCache } from "./helpers.js";
+import { tokenRequired, initCache, resetStorageObjs } from "./helpers.js";
 
 // Create and append profile and navbar elements
 async function main () { 
@@ -151,6 +151,9 @@ function revokeAccess(token) {
 
     // Remove user info from cache
     chrome.storage.session.clear();
+
+    // Reset file info
+    resetStorageObjs("fileSettings");
 
     // Refresh page
     location.reload();
