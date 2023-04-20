@@ -45,8 +45,6 @@ chrome.webNavigation.onCommitted.addListener((details) => {
             }
         }
 
-        console.log("items", items);
-
         // Abort if there's no block list
         if (!items.blockList) {
             return;
@@ -75,22 +73,19 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
     // Deal with chrome.alarms bug when service worker goes idle (alarm triggering twice)
     let { inZone } = await chrome.storage.sync.get("inZone"); 
-    if(inZone.lastAlarmName === alarm.name) return;
+    if (inZone.lastAlarmName === alarm.name) return;
     inZone.lastAlarmName = alarm.name;
     chrome.storage.sync.set({ inZone });
     
     // Alarm for DEFINED time setting
     const userInfo = await chrome.storage.session.get();
-    console.log("userinfo: ", userInfo);
-    if(alarm.name === "defined") {
+    if (alarm.name === "defined") {
         await endZoneTime(true);
         notify("Session is over!");
         if (userInfo?.authorized) {
-            console.log("defined foi pro upload session");
             await uploadSession();
         }
         else if (!userInfo?.authorized) {
-            console.log("defined foi pro reset inZone");
             await resetStorageObjs("inZone");
         }
     }
@@ -100,8 +95,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
         // Narrow pomodoro possibilities to three options (zone, break, last)
         let pomoIndex = alarm.name.slice(alarm.name.indexOf(" ") + 1);
-        if(pomoIndex !== "last" && parseInt(pomoIndex) % 2 == 0) pomoIndex = "zone";
-        else if(pomoIndex !== "last" && parseInt(pomoIndex) % 2 != 0) pomoIndex = "break";
+        if (pomoIndex !== "last" && parseInt(pomoIndex) % 2 == 0) pomoIndex = "zone";
+        else if (pomoIndex !== "last" && parseInt(pomoIndex) % 2 != 0) pomoIndex = "break";
         
         // Update inZone and notify user
         switch(pomoIndex) {
@@ -119,11 +114,9 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
                 await endBreakTime(true);
                 notify("Pomodoro session is over!");
                 if (userInfo?.authorized) {
-                    console.log("pomodoro foi pro upload session");
                     await uploadSession();
                 }
                 else if (!userInfo?.authorized) {
-                    console.log("pomodoro foi pro reset inZone");
                     await resetStorageObjs("inZone");
                 }
                 break;
@@ -132,7 +125,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 });
 
 
-// Initialize session cache on startup (initCache from oauth.js)
+// Initialize session cache on startup (initCache from helpers.js)
 chrome.runtime.onStartup.addListener(initCache);
 
 

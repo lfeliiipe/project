@@ -196,7 +196,7 @@ zoneButton.addEventListener("click", async (event) => {
     // Prevent page from reloading
     event.preventDefault();
 
-    // inZone updates
+    // Retrieve inZone object 
     const { inZone } = await chrome.storage.sync.get("inZone");
 
     // Prevent double starting
@@ -221,12 +221,10 @@ zoneButton.addEventListener("click", async (event) => {
         hours = parseInt(d_hours.value);
         if ((pomo.checked && (!zoneMinutes || !breakMinutes || !cicles)) || (def.checked && (!minutes && !hours))) {
             alert("Not allowed");
-            console.log("if do try");
             return;
         }
     }
     catch {
-        console.log("caiu no catch");
         alert("Not Allowed");
         return;
     }

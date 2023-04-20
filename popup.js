@@ -132,7 +132,7 @@ async function toggleTab(tab, on=true) {
 // Get an authorization token from the user then load information
 async function authorize() {
 
-    // True parameter means authorization token request in interactive mode (initCache from oauth.js)
+    // True parameter means authorization token request in interactive mode (initCache from helpers.js)
     await initCache(true);
     loadUserInfo();
 }

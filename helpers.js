@@ -1,7 +1,6 @@
 // Resets/Creates necessary objects 
 async function resetStorageObjs(objName) {
 
-    console.log("entrou pra resetar: ", objName);
     switch(objName) {
         case "inZone":
             const inZone = {
@@ -20,7 +19,6 @@ async function resetStorageObjs(objName) {
                 pomoDates: []
             };
             await chrome.storage.sync.set({ inZone });
-            console.log("inZone depois do reset: ", inZone);
             break;
 
         case "blockList":
