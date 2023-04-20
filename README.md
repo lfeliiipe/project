@@ -1,6 +1,6 @@
 # Focus Helper and Study Logger
 
-## Video Demo: [url_here]()
+## Video Demo: [https://youtu.be/70c3Jk3zcSk](https://youtu.be/70c3Jk3zcSk)
 
 ## Description: 
 
