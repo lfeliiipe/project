@@ -3,6 +3,7 @@
     "description": "Extension to help you studying/working",
     "version": "1.0",
     "manifest_version": 3,
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvZ1iSOOQCSWjswsvExFl58ZR/+oTuHgpvXHZAkkECCvOnGfG7hjNf3q94Yr6VrgiGsItyQD4nNUeYLsFjdlOtGEVBmqrMeozJjyij96CXps7tSITp5EVBfuUUDyEprYn4SHmo+7M2py0Toq5HP8pPBeIqdvQWSdWXiBn7igSqUFBGJL2+QDeCghB/0KNdlq+x/bqMwTtXEHVB7+0Znmixaj2zHNZnpsCHRAM1Pn8PWriolVfUcUwUj20DEYZIMzWEipH46L5be+WIlAAlSUwau9sSMY0328bRMoDXeJ/D4Wv3aC3ztxcX/RfXPnHD8y6TaK5/9l0kQ2tkzmsYgltsQIDAQAB",
     "icons": {
       "16": "./imgs/icon.png",
       "32": "./imgs/icon.png",
@@ -15,7 +16,7 @@
     },
     "options_page": "options.html",
     "oauth2": {
-      "client_id": "YOUR_API_KEY",
+      "client_id": "819155835491-v0634njo2ihu5buve3bndnpc1m7p0hv2.apps.googleusercontent.com",
         "scopes":[
           "openid email profile", "https://www.googleapis.com/auth/drive.file"
         ]

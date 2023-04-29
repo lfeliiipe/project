@@ -219,7 +219,8 @@ zoneButton.addEventListener("click", async (event) => {
         cicles = parseInt(sessions.value);
         minutes = parseInt(d_minutes.value);
         hours = parseInt(d_hours.value);
-        if ((pomo.checked && (!zoneMinutes || !breakMinutes || !cicles)) || (def.checked && (!minutes && !hours))) {
+        if ((pomo.checked && (!zoneMinutes || !breakMinutes || !cicles)) || (def.checked && (!minutes && !hours)) 
+            || (!pomo.checked && !def.checked && !und.checked)) {
             alert("Not allowed");
             return;
         }
