@@ -3,6 +3,9 @@
 ## Video Demo: [https://youtu.be/70c3Jk3zcSk](https://youtu.be/70c3Jk3zcSk)
 
 ## Description: 
+<div align=center>
+    <img width=70% src="https://github.com/user-attachments/assets/e1996bca-edf2-4c4f-bb46-30e4be16033e">
+</div>
 
 Focus Helper and Study Logger is a chrome extension that allows the user to block distracting websites, set timers for study/work sessions, and if desired, log those sessions in spreadsheets via Google Drive.
 
